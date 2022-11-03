@@ -1,0 +1,45 @@
+@define-color base00 #282828;
+@define-color base01 #121212;
+@define-color base02 #8EC07C;
+@define-color base03 #608787;
+
+window {
+  opacity: 0.95;
+  border:  0px;
+  font-family: Noto Sans;
+  font-size: 16px;
+  background: @base01;
+}
+
+#input {
+  padding: 1em;
+  font-size: 26px;
+  color: @base02;
+  background-color: @base01;
+  border: none;
+}
+
+#inner-box {
+  padding: 10px 20px;
+  margin: 20px;
+  background: @base01;
+}
+
+#outer-box {
+  margin: 0px;
+}
+
+#selected {
+}
+
+#entry {
+  padding: 6px;
+}
+
+#scroll {
+}
+
+#text {
+  margin: 0px;
+  padding: 6px;
+}

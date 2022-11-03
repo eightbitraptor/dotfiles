@@ -1,6 +1,6 @@
 FROM fedora
 
-RUN dnf install -y curl coreutils
+RUN dnf install -y curl coreutils flatpak
 
 # Fake the output of hostname for testing
 RUN mkdir -p /usr/local/bin

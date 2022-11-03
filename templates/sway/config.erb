@@ -1,0 +1,179 @@
+#vim:ft=i3
+exec cat ~/.cache/wal/sequences
+
+set $mod Mod4
+floating_modifier $mod
+
+font pango:Noto Sans 12
+
+input "1118:2496:Microsoft_Surface_Type_Cover_Keyboard" {
+    xkb_layout gb
+    xkb_options ctrl:nocaps	
+}
+
+<%= @monitor_config %>
+exec ~/.azotebg
+
+exec swayidle \
+    timeout 300 'swaylock -c 21202c' \
+    timeout 600 'swaymsg "output * dpms off"' \
+      resume 'swaymsg "output * dpms on"' \
+    before-sleep 'swaylock -c 21202c' \
+
+gaps inner 0
+gaps outer 0
+
+bindsym Menu+Left  exec pactl set-sink-volume @DEFAULT_SINK@ -5%
+bindsym Menu+Right exec pactl set-sink-volume @DEFAULT_SINK@ +5%
+bindsym Menu+Up    exec light -T 1.4
+bindsym Menu+Down  exec light -T 0.72
+
+bindsym $mod+Return exec alacritty
+bindsym $mod+Shift+q kill
+
+bindsym $mod+d exec wofi --show drun
+bindsym $mod+Shift+d exec wofi --show run
+
+bindsym $mod+h focus left
+bindsym $mod+j focus down
+bindsym $mod+k focus up
+bindsym $mod+l focus right
+bindsym $mod+Left focus left
+bindsym $mod+Down focus down
+bindsym $mod+Up focus up
+bindsym $mod+Right focus right
+
+bindsym $mod+Shift+h move left
+bindsym $mod+Shift+j move down
+bindsym $mod+Shift+k move up
+bindsym $mod+Shift+l move right
+bindsym $mod+Shift+Left move left
+bindsym $mod+Shift+Down move down
+bindsym $mod+Shift+Up move up
+bindsym $mod+Shift+Right move right
+
+bindsym $mod+Shift+o move workspace to output left
+
+bindsym $mod+b split h
+bindsym $mod+v split v
+
+bindsym $mod+f fullscreen toggle
+bindsym $mod+t layout tabbed
+bindsym $mod+s layout stacked
+bindsym $mod+e layout toggle split
+
+bindsym $mod+Shift+space floating toggle
+
+bindsym $mod+space focus mode_toggle
+bindsym $mod+a focus parent
+#bindsym $mod+d focus child
+
+set $workspace1 "1"
+set $workspace2 "2"
+set $workspace3 "3"
+set $workspace4 "4"
+set $workspace5 "5"
+set $workspace6 "6"
+set $workspace7 "7"
+set $workspace8 "8"
+set $workspace9 "9"
+set $workspace10 "10"
+
+bindsym $mod+1 workspace $workspace1
+bindsym $mod+2 workspace $workspace2
+bindsym $mod+3 workspace $workspace3
+bindsym $mod+4 workspace $workspace4
+bindsym $mod+5 workspace $workspace5
+bindsym $mod+6 workspace $workspace6
+bindsym $mod+7 workspace $workspace7
+bindsym $mod+8 workspace $workspace8
+bindsym $mod+9 workspace $workspace9
+bindsym $mod+0 workspace $workspace10
+
+# move focused container to workspace
+bindsym $mod+Shift+1 move container to workspace $workspace1
+bindsym $mod+Shift+2 move container to workspace $workspace2
+bindsym $mod+Shift+3 move container to workspace $workspace3
+bindsym $mod+Shift+4 move container to workspace $workspace4
+bindsym $mod+Shift+5 move container to workspace $workspace5
+bindsym $mod+Shift+6 move container to workspace $workspace6
+bindsym $mod+Shift+7 move container to workspace $workspace7
+bindsym $mod+Shift+8 move container to workspace $workspace8
+bindsym $mod+Shift+9 move container to workspace $workspace9
+bindsym $mod+Shift+0 move container to workspace $workspace10
+
+bindsym $mod+Shift+c reload
+bindsym $mod+Shift+r restart
+bindsym $mod+Shift+e exec "i3-nagbar -t warning -m 'You pressed the exit shortcut. Do you really want to exit i3? This will end your X session.' -b 'Yes, exit i3' 'i3-msg exit'"
+
+# Pulse Audio Controls {{{
+bindsym XF86AudioMute        exec --no-startup-id pactl set-sink-mute   0 toggle
+bindsym XF86AudioLowerVolume exec --no-startup-id pactl set-sink-volume 0 -5%
+bindsym XF86AudioRaiseVolume exec --no-startup-id pactl set-sink-volume 0 +5%
+
+set $mode_volume Volume (d) down, (u) up, (m) toggle mute, (p) pavucontrol
+mode "$mode_volume" {
+    bindsym d exec --no-startup-id pactl set-sink-volume 0 -5%
+    bindsym u exec --no-startup-id pactl set-sink-volume 0 +5%
+    bindsym m exec --no-startup-id pactl set-sink-mute   0 toggle, mode "default"
+    bindsym p exec --no-startup-id pavucontrol, mode "default"
+
+    # back to normal: Enter or Escape
+    bindsym Return mode "default"
+    bindsym Escape mode "default"
+}
+bindsym $mod+Ctrl+v mode "$mode_volume"
+
+mode "resize" {
+        bindsym h resize shrink width 10 px or 10 ppt
+        bindsym j resize grow height 10 px or 10 ppt
+        bindsym k resize shrink height 10 px or 10 ppt
+        bindsym l resize grow width 10 px or 10 ppt
+
+        bindsym Left resize shrink width 10 px or 10 ppt
+        bindsym Down resize grow height 10 px or 10 ppt
+        bindsym Up resize shrink height 10 px or 10 ppt
+        bindsym Right resize grow width 10 px or 10 ppt
+
+        bindsym Return mode "default"
+        bindsym Escape mode "default"
+}
+bindsym $mod+r mode "resize"
+
+set $mode_system Screens (l) lock, (e) logout, (s) suspend, (h) hibernate, (r) reboot, (Shift+s) shutdown
+mode "$mode_system" {
+    bindsym l exec --no-startup-id $HOME/.config/sway/swayexit lock, mode "default"
+    bindsym e exec --no-startup-id $HOME/.config/sway/swayexit logout, mode "default"
+    bindsym s exec --no-startup-id $HOME/.config/sway/swayexit suspend, mode "default"
+    bindsym h exec --no-startup-id $HOME/.config/sway/swayexit hibernate, mode "default"
+    bindsym r exec --no-startup-id $HOME/.config/sway/swayexit reboot, mode "default"
+    bindsym Shift+s exec --no-startup-id $HOME/.config.sway/swayexit shutdown, mode "default"
+
+    # back to normal: Enter or Escape
+    bindsym Return mode "default"
+    bindsym Escape mode "default"
+}
+bindsym $mod+Ctrl+BackSpace mode "$mode_system"
+
+# TODO (leftover i3 config): Do I even need this anymore - it's busted in sway
+set $mode_screens System (l) laptop only, (w) work externals, (m) mirror, (h) home external
+mode "$mode_screens" {
+    bindsym l exec --no-startup-id $HOME/.screenlayout/laptop_only.sh, mode "default"
+    bindsym w exec --no-startup-id $HOME/.screenlayout/work_both_external.sh, mode "default"
+    bindsym m exec --no-startup-id $HOME/.screenlayout/mirror.sh, mode "default"
+    bindsym h exec --no-startup-id $HOME/.screenlayout/home_monitor.sh, mode "default"
+
+    # back to normal: Enter or Escape
+    bindsym Return mode "default"
+    bindsym Escape mode "default"
+}
+bindsym $mod+Ctrl+s mode "$mode_screens"
+
+bar {
+    position top
+
+    status_command while $HOME/.config/sway/status.sh; do sleep 1; done
+}
+
+for_window [class="^.*"] border pixel 2
+default_border pixel 3

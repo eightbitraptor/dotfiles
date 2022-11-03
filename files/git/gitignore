@@ -1,6 +1,14 @@
-.bundle
-TAGS
 .solargraph.yml
 .dumbjump
-my_test.svg
+.bundle
 .DS_Store
+.envrc
+.cache
+.vscode
+
+compile_commands.json
+*.tmp.y
+*.new
+lib/mjit
+
+TAGS
