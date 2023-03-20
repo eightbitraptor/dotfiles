@@ -23,9 +23,12 @@ dotfile pipewire_pulse_config_home + "/pipewire-pulse.conf" do
   source "mopidy/pipewire-pulse.conf"
 end
 
-dotfile "/etc/mopidy/mopidy.conf" do
-  source "mopidy/mopidy.conf"
-  owner "root"
+template "/etc/mopidy/mopidy.conf" do
+  source "#{TEMPLATES_DIR}/mopidy/mopidy.conf.erb"
+  variables(
+    last_fm_password: ENV.fetch("EBR_LASTFM_PASS")
+  )
+  mode "644"
 end
 
 group "music" do
