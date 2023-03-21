@@ -114,6 +114,7 @@ autocmd BufRead,BufNewFile Makefile * set noet
 
 augroup RubyShenanigans
   au!
+  autocmd BufRead /home/mattvh/git/ruby/*.c   setlocal cinoptions=:2,=2,l1
   autocmd BufRead,BufNewFile Gemfile,Rakefile,Capfile,*.rake
         \ set filetype=ruby
   autocmd BufRead,BufNewFile *.rb
