@@ -41,7 +41,7 @@ As a general rule, try not to add new code to the preludes.
 ### nodes
 
 * `senjougahara` - Development Desktop, Fedora 37.
-* `kyouko` - Development Laptop, Microsoft Surface Pro 7 i7, Fedora 37, kernel
+* `hitomi` - Development Laptop, Microsoft Surface Pro 7 i7, Fedora 37, kernel
   from the [linux surface](https://github.com/linux-surface/linux-surface)
   project.
 * `shopify-mvh` - Work laptop, Macbook Pro M1 Pro, macOS
