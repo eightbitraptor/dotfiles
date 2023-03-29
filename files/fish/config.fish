@@ -2,6 +2,10 @@ if set -q ALACRITTY_LOG
   cat ~/.cache/wal/sequences
 end
 
+set -Ux QT_IM_MODULE fcitx
+set -Ux XMODIFIERS @im=fcitx
+set -Ux GTK_IM_MODULE fcitx
+
 set fish_greeting
 if status is-interactive
     # Commands to run in interactive sessions can go here
