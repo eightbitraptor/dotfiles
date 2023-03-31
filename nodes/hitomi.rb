@@ -1,7 +1,7 @@
 node.reverse_merge!(
   waybar_modules_left: ["sway/workspaces", "sway/mode"],
   waybar_modules_center: ["mpd"],
-  waybar_modules_right: ["tray", "memory", "cpu", "pulseaudio", "network", "battery", "custom/weather", "clock"],
+  waybar_modules_right: ["tray", "memory", "cpu", "pulseaudio", "network", "battery", "clock"],
 
   mconfig: <<~MCONFIG
     output eDP-1 pos 0 0 scale 1.75
