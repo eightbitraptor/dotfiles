@@ -172,9 +172,7 @@ mode "$mode_screens" {
 bindsym $mod+Ctrl+s mode "$mode_screens"
 
 bar {
-    position top
-
-    status_command while $HOME/.config/sway/status.sh; do sleep 1; done
+  swaybar_command waybar
 }
 
 for_window [class="^.*"] border pixel 2
