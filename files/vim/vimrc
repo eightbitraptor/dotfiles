@@ -1,5 +1,5 @@
-let $PATH = system("printenv PATH")
-let $PATH = substitute($PATH, "\<C-J>$", "", "")
+"let $PATH = system("printenv PATH")
+"let $PATH = substitute($PATH, "\<C-J>$", "", "")
 
 call plug#begin('~/.vim/plugged')
 
