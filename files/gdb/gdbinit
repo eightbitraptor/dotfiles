@@ -1,0 +1,13 @@
+# Print structs with linebreaks like lldb rather than all on one line
+set print pretty on
+
+# Save command history between sessions and keep it global rather than
+# per project
+set history save on
+set history filename ~/.gdb_history
+
+add-auto-load-safe-path /home/mattvh/miniruby-gdb.py
+
+define hook-quit
+  set confirm off
+end
