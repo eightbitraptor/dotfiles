@@ -5,7 +5,7 @@ node.reverse_merge!(
 
   mconfig: <<~MCONFIG
     output 'Dell Inc. DELL U2515H 9X2VY5630BML' pos 0 0
-    output 'Goldstar Company Ltd LG HDR 4K 0x00007E8D' pos 2560 0 scale 1.25
+    output 'LG Electronics LG HDR 4K 0x00007E8D' pos 2560 0 scale 1.5
   MCONFIG
 )
 
