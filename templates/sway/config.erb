@@ -24,6 +24,8 @@ exec --no-startup-id fcitx5 -d
 gaps inner 4
 gaps outer 4
 
+focus_follows_mouse no
+
 bindsym Menu+Left  exec pactl set-sink-volume @DEFAULT_SINK@ -5%
 bindsym Menu+Right exec pactl set-sink-volume @DEFAULT_SINK@ +5%
 bindsym Menu+Up    exec light -T 1.4
