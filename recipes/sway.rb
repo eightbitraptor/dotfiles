@@ -2,6 +2,7 @@ include_local_recipe "alacritty"
 include_local_recipe "wofi"
 
 packages = %w{
+  fontawesome-fonts
   python3-pip
   azote
   sway
