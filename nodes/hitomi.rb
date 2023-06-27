@@ -16,3 +16,5 @@ include_local_recipe "sway"
 include_local_recipe "fish"
 
 include_local_recipe "mpv"
+
+include_local_recipe "ruby-dev"
