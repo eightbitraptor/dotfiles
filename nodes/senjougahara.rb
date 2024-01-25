@@ -20,6 +20,7 @@ end
 include_local_recipe "emacs"
 include_local_recipe "tmux"
 include_local_recipe "vim"
+include_local_recipe "labwc"
 include_local_recipe "sway"
 include_local_recipe "mopidy"
 include_local_recipe "gdb"
