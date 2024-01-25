@@ -21,6 +21,8 @@ Plug 'tpope/vim-unimpaired'
 Plug 'godlygeek/tabular'
 Plug 'preservim/tagbar'
 Plug 'tpope/vim-vinegar'
+Plug 'bfrg/vim-cpp-modern'
+Plug 'vim-scripts/VimCompletesMe'
 
 " Ruby/Rails
 Plug 'vim-ruby/vim-ruby'
