@@ -12,3 +12,9 @@ compile_commands.json
 lib/mjit
 
 TAGS
+
+test.rb
+test_code.rb
+
+cruby.txt
+prism.txt
