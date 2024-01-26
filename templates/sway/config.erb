@@ -96,6 +96,9 @@ bindsym $mod+8 workspace $workspace8
 bindsym $mod+9 workspace $workspace9
 bindsym $mod+0 workspace $workspace10
 
+bindsym $mod+Tab workspace next
+bindsym $mod+Shift+Tab workspace prev
+
 # move focused container to workspace
 bindsym $mod+Shift+1 move container to workspace $workspace1
 bindsym $mod+Shift+2 move container to workspace $workspace2
@@ -182,4 +185,6 @@ bar {
 for_window [class="^.*"] border pixel 2
 for_window [app_id="mpv"] floating enable
 for_window [app_id="thunar"] floating enable
+for_window [app_id="org.kde.dolphin"] floating enable
+
 default_border pixel 3
