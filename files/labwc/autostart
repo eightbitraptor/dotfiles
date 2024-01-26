@@ -1,11 +1,11 @@
 # Set the wallpaper (from the previous session)
-/bin/bash $HOME/.fehbg &
+~/.azotebg
 
 # Use Caps lock key as a third CTRL key
 /usr/bin/setxkbmap -option "ctrl:nocaps" &
 
-# Compositor for transparency (important for Ulauncher - it looks shit otherwise)
-/usr/bin/compton &
+# Kanshi manages monitor config and scaling
+/usr/bin/kanshi
 
-# Polybar for simple observability
-/bin/bash $HOME/.config/polybar/launch.sh
+# Waybar - For the system tray mainly.
+/usr/bin/waybar -c ~/.config/waybar/config &
