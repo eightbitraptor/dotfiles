@@ -1,0 +1,5 @@
+if [ "$XDG_SESSION_DESKTOP" = "sway" ] ; then
+    export QT_QPA_PLATFORMTHEME=qt5ct
+    export QT_IM_MODULE=fcitx
+fi
+. "$HOME/.cargo/env"

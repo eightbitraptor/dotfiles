@@ -7,6 +7,7 @@ packages = %w{
   azote
   sway
   swaylock
+  qt5ct
   wofi
   light
   waybar
