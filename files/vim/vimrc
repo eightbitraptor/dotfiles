@@ -56,6 +56,12 @@ set term=xterm-256colors
 set termguicolors
 set background=dark
 
+" Fedora sets cscopetag by default, which changes the behaviour of Ctrl-] to
+" always show a tselect list when there is more than one result, whereas I
+" want the default behaviour of - jump to the first result, if it looks wrong
+" I can tselect myself.
+set nocscopetag
+
 syntax on
 
 set clipboard=unnamed
