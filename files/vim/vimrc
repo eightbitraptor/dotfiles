@@ -149,6 +149,7 @@ augroup CShenanigans
   autocmd BufRead,BufNewFile *.c,*.h
         \ set filetype=c |
         \ set tabstop=8 shiftwidth=4 smarttab expandtab |
+  autocmd BufRead */ruby/*.c   setlocal cinoptions=:2,=2,l1
 augroup END
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
