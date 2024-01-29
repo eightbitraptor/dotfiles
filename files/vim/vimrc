@@ -13,6 +13,7 @@ Plug 'tpope/vim-fugitive'
 " Project navigation
 Plug 'junegunn/fzf'
 Plug 'junegunn/fzf.vim'
+Plug 'lambdalisue/fern.vim'
 
 " Code utils
 Plug 'tpope/vim-surround'
@@ -194,7 +195,7 @@ nnoremap <leader>l :Lines<CR>
 nnoremap <leader>T :Tags<CR>
 nnoremap <leader>t :BTags<CR>
 
-nnoremap <leader>n :NerdTreeToggle<CR>
+nnoremap <leader>n :Fern . -drawer -toggle -reveal=%<CR>
 nnoremap <leader>s :TagbarToggle<CR>
 
 " building Ruby
