@@ -54,9 +54,14 @@ execute "Cleanup Chruby-Fish" do
   only_if "test -e /tmp/chruby-fish.tar.gz || test -e /tmp/chruby-fish-0.8.2"
 end
 
-execute "Fisher: fzf" do
-  command "fish -c 'fisher install PatrickF1/fzf.fish'"
-  user node.user
-  not_if "test $(cat #{node.home_dir}/.config/fish/fish_plugins | grep fzf | wc -l) -gt 0"
-end
+fisher_plugins = %w{
+  jorgebucaran/fisher
+  rafaelrinaldi/pure
+  danhper/fish-ssh-agent
+  patrickf1/fzf.fish
+  jorgebucaran/nvm.fish
+}
 
+fisher_plugins.each do
+  fisher _1
+end

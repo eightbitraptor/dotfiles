@@ -82,5 +82,14 @@ define :systemd_service, enable: false do
   end
 end
 
+define :fisher do
+  repo, package = params[:name].split('/')
+
+  execute "fish -c 'fisher install #{params[:name]}'" do
+    not_if "test $(cat #{node.home_dir}/.config/fish/fish_plugins | grep #{package} | wc -l) -gt 0"
+  end
+  user node.user
+end
+
 include_recipe "recipes/prelude/#{node.os}.rb"
 include_recipe "#{NODES_DIR}/#{node[:hostname]}.rb"
