@@ -23,6 +23,7 @@ end
 dotfiles = {
   ".config/sway/swayexit" => "sway/swayexit",
   ".config/sway/status.sh" => "sway/status.#{node.hostname}.sh",
+  ".config/swaylock/config" => "sway/swaylock.config",
   ".config/waybar/style.css" => "waybar/style.css",
   ".config/waybar/modules/battery.py" => "waybar/battery.py",
   ".config/xdg-desktop-portal/portals.conf" => "xdg/portals.conf"

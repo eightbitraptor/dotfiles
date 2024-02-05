@@ -6,7 +6,7 @@
 
 case "$1" in
     lock)
-        swaylock -c 21202c
+        swaylock
         ;;
     logout)
         swaymsg exit
