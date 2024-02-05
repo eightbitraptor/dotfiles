@@ -21,12 +21,9 @@ dotfile ".profile" do
   source "senjougahara/profile"
 end
 
-include_local_recipe "emacs"
 include_local_recipe "fish"
 include_local_recipe "tmux"
 include_local_recipe "vim"
-include_local_recipe "labwc"
-include_local_recipe "sway"
-include_local_recipe "mopidy"
+include_local_recipe "neovim"
 include_local_recipe "abcde"
 include_local_recipe "gdb"
