@@ -2,7 +2,6 @@ PACKAGES = %w{
   mg 
   git 
   htop 
-  labwc
   ruby
 }
 
