@@ -3,6 +3,9 @@ PACKAGES = %w{
   git 
   htop 
   ruby
+
+  fontawesome-fonts-all
+  jetbrains-mono-fonts-all
 }
 
 include_local_recipe "flathub"
