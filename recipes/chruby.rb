@@ -1,5 +1,11 @@
-package "wget" do
-  action :install
+packages = %w{
+  wget
+  make
+}
+packages.each do
+  package _1 do
+     action :install
+  end
 end
 
 chruby_version = "0.3.9"

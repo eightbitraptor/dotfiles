@@ -85,7 +85,8 @@ end
 define :fisher do
   repo, package = params[:name].split('/')
 
-  execute "fish -c 'fisher install #{params[:name]}'" do
+  execute "fish -c \"fisher install #{params[:name]}\"" do
+    user node[:user]
     not_if "test $(cat #{node.home_dir}/.config/fish/fish_plugins | grep #{package} | wc -l) -gt 0"
   end
   user node.user
