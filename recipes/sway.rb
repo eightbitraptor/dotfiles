@@ -11,9 +11,6 @@ packages = %w{
   wofi
   light
   waybar
-  xdg-desktop-portal-wlr
-  xdg-desktop-portal-kde
-  xdg-desktop-portal-gtk
 }.each do |pkg_name|
   package pkg_name do
     action :install
@@ -26,7 +23,6 @@ dotfiles = {
   ".config/swaylock/config" => "sway/swaylock.config",
   ".config/waybar/style.css" => "waybar/style.css",
   ".config/waybar/modules/battery.py" => "waybar/battery.py",
-  ".config/xdg-desktop-portal/portals.conf" => "xdg/portals.conf"
 }
 
 dotfile_template ".config/sway/config" do
