@@ -2,6 +2,7 @@ PACKAGES = %w{
   mg 
   git 
   htop 
+  git-delta
 }
 
 PACKAGES.each do |pkg|
