@@ -11,7 +11,7 @@ packages.each do |pname|
 end
 
 git "Emacs config" do
-  repository "https://github.com/eightbitraptor/dotemacs"
+  repository "git@github.com:eightbitraptor/dotemacs"
   user node.user
   destination "#{node.home_dir}/.emacs.d"
 end
