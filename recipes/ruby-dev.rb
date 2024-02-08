@@ -6,6 +6,7 @@ tools = %w{
   gdb
   rr
   make
+  bear
 }
 
 ruby_deps = %w{
@@ -21,4 +22,8 @@ ruby_deps = %w{
   package package do
     action :install
   end
+end
+
+unless File.exist?("#{node.home_dir}/.local/bin/compdb")
+  execute "pip install --user git+https://github.com/Sarcasm/compdb.git#egg=compdb"
 end
