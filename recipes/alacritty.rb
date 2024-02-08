@@ -9,6 +9,6 @@ packages.each do |pname|
   end
 end
 
-dotfile ".config/alacritty/alacritty.yml" do
-  source "alacritty/alacritty.yml"
+dotfile ".config/alacritty/alacritty.toml" do
+  source "alacritty/alacritty.toml"
 end
