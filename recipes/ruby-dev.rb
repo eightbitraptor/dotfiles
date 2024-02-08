@@ -7,6 +7,8 @@ tools = %w{
   rr
   make
   bear
+  lldb
+  clang-tools-extra # for clangd
 }
 
 ruby_deps = %w{
