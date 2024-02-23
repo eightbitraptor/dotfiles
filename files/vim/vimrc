@@ -64,7 +64,9 @@ set nocscopetag
 
 syntax on
 
-set clipboard=unnamed
+if !exists('$TMUX')
+    set clipboard=unnamed
+endif
 
 set autoindent " Auto-indent
 set expandtab " Expand tabs to spaces
