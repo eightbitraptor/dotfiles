@@ -24,6 +24,7 @@ end
 include_local_recipe "emacs"
 include_local_recipe "sway"
 include_local_recipe "fish"
+include_local_recipe "fish-chruby"
 include_local_recipe "tmux"
 include_local_recipe "vim"
 include_local_recipe "neovim"
