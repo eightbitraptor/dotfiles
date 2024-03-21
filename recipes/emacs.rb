@@ -1,12 +1,14 @@
-packages = %w{
-  emacs
-  jetbrains-mono-nl-fonts
-  jetbrains-mono-fonts
-}
+if node.os == "linux"
+  packages = %w{
+    emacs
+    jetbrains-mono-nl-fonts
+    jetbrains-mono-fonts
+  }
 
-packages.each do |pname|
-  package pname do
-    action :install
+  packages.each do |pname|
+    package pname do
+      action :install
+    end
   end
 end
 
