@@ -9,6 +9,7 @@
   diffFilter = delta --color-only
 [diff]
   colorMoved = false
+  algorithm = patience
 [delta]
   navigate = true
   light = false
@@ -61,8 +62,7 @@
   sslverify = false
 [include]
   path = ~/.gitconfig.local
-[diff]
-	algorithm = patience
+	path = /Users/mattvh/.config/dev/gitconfig
 [commit]
 	verbose = true
 [init]
