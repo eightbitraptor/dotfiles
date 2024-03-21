@@ -3,6 +3,7 @@ PACKAGES = %w{
   git 
   htop 
   git-delta
+  tig
 }
 
 PACKAGES.each do |pkg|

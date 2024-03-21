@@ -2,6 +2,7 @@ PACKAGES = %w{
   mg 
   git 
   git-delta
+  tig
   htop 
   ruby
 
