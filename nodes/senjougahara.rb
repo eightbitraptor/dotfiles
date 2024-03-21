@@ -1,7 +1,7 @@
 node.reverse_merge!(
   waybar_modules_left: ["sway/workspaces", "sway/mode"],
   waybar_modules_center: ["mpd"],
-  waybar_modules_right: ["idle_inhibitor", "tray", "memory", "cpu", "pulseaudio", "network", "custom/weather", "clock"],
+  waybar_modules_right: ["idle_inhibitor", "tray", "memory", "cpu", "pulseaudio", "network", "clock"],
 
   mconfig: <<~MCONFIG
     output 'Dell Inc. DELL U2515H 9X2VY5630BML' pos 0 0
