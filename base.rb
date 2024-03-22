@@ -8,9 +8,17 @@ when "linux"
 else
   ENV["HOME"]
 end
+$distro = case $os
+when "linux"
+  run_command("awk '/^ID=/' /etc/*-release | tr -d 'ID='")
+    .stdout.strip
+else
+  "not-linux"
+end
 
 node.reverse_merge!(
   os: $os,
+  distro: $distro,
   hostname: run_command('hostname').stdout.split('.').first.downcase.strip,
   user: ENV['SUDO_USER'] || ENV['USER'],
   home_dir: $home_dir,

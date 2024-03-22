@@ -8,20 +8,32 @@ tools = %w{
   make
   bear
   lldb
-  clang-tools-extra # for clangd
 }
 
-ruby_deps = %w{
-  zlib-devel
-  libffi-devel
-  readline-devel
-  gdbm-devel
-  openssl-devel
-  libyaml-devel
-}
+case node.distro
+when "fedora"
+  tools << "clang-tools-extra"
+when "ubuntu"
+  tools << "clang-tools"
+end
 
-(tools + ruby_deps).each do |package|
+ruby_deps = [
+  {fedora: "zlib-devel",      ubuntu: "zlib1g-dev"},
+  {fedora: "libffi-devel",    ubuntu: "libffi-dev"},
+  {fedora: "readline-devel",  ubuntu: "libreadline-dev"},
+  {fedora: "gdbm-devel",      ubuntu: "libgdbm-dev"},
+  {fedora: "openssl-devel",   ubuntu: "libssl-dev"},
+  {fedora: "libyaml-devel",   ubuntu: "libyaml-dev"},
+]
+
+tools.each do |package|
   package package do
+    action :install
+  end
+end
+
+ruby_deps.each do |package_pairs|
+  package package_pairs[node.distro.intern] do
     action :install
   end
 end

@@ -1,16 +1,18 @@
 PACKAGES = %w{ 
   mg 
   git 
-  git-delta
   tig
   htop 
   ruby
-
-  fontawesome-fonts-all
-  jetbrains-mono-fonts-all
 }
 
-include_local_recipe "flathub"
+if node.distro == "fedora"
+  include_local_recipe "flathub"
+  packages << %w{
+    fontawesome-fonts-all
+    jetbrains-mono-fonts-all
+  }
+end
 
 PACKAGES.each do |pkg|
   package(pkg) { action :install }

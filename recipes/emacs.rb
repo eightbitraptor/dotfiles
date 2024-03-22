@@ -1,9 +1,14 @@
 if node.os == "linux"
   packages = %w{
     emacs
-    jetbrains-mono-nl-fonts
-    jetbrains-mono-fonts
   }
+
+  if node.distro == "fedora"
+    packages << %w{
+      jetbrains-mono-nl-fonts
+      jetbrains-mono-fonts
+    }
+  end
 
   packages.each do |pname|
     package pname do
@@ -12,8 +17,14 @@ if node.os == "linux"
   end
 end
 
+emacs_repo = if node.hostname == "spin"
+  "https://github.com/eightbitraptor/dotemacs"
+else
+  "git@github.com:eightbitraptor/dotemacs"
+end
+
 git "Emacs config" do
-  repository "git@github.com:eightbitraptor/dotemacs"
+  repository emacs_repo
   user node.user
   destination "#{node.home_dir}/.emacs.d"
 end

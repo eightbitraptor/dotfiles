@@ -1,5 +1,5 @@
-vim_pkg = case node.os
-when "linux"
+vim_pkg = case node.distro
+when "fedora"
   "vim-enhanced"
 else
   "vim"
