@@ -4,17 +4,11 @@
   autocrlf = input
   commitGraph = true
   editor = vim
-  pager = delta
 [checkout]
   defaultRemote = origin
-[interactive]
-  diffFilter = delta --color-only
 [diff]
   colorMoved = false
   algorithm = patience
-[delta]
-  navigate = true
-  light = false
 [alias]
   praise = blame
   st = status

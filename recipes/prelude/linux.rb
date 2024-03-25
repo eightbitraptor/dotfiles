@@ -1,8 +1,8 @@
 PACKAGES = %w{ 
-  mg 
-  git 
+  mg
+  git
   tig
-  htop 
+  htop
   ruby
 }
 

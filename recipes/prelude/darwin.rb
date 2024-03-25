@@ -1,8 +1,7 @@
 PACKAGES = %w{ 
-  mg 
-  git 
-  htop 
-  git-delta
+  mg
+  git
+  htop
   tig
 }
 
