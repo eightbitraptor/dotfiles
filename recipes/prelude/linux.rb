@@ -1,8 +1,10 @@
+include_local_recipe "prelude/shared"
+
 PACKAGES = %w{ 
   mg
   git
   tig
-  htop
+  htop 
   ruby
 }
 
@@ -17,10 +19,3 @@ end
 PACKAGES.each do |pkg|
   package(pkg) { action :install }
 end
-
-dotfiles = {
-  ".gitignore" => "git/gitignore",
-  ".gitconfig" => "git/gitconfig"
-}
-
-dotfile dotfiles
