@@ -14,7 +14,6 @@ end
 switch (uname)
   case Linux
     source /usr/local/share/chruby/chruby.fish
-    chruby 3.3.0
 end
 
 # commands which require binaries installed by homebrew need to come after this
@@ -28,5 +27,6 @@ if test -f /opt/dev/dev.fish
 end
 
 direnv hook fish | source
+chruby 3.3.0
 
 #status --is-interactive; and ~/.rbenv/bin/rbenv init - fish | source
