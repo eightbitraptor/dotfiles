@@ -5,6 +5,8 @@
   commitGraph = true
   editor = vim
   pager = delta
+[checkout]
+  defaultRemote = origin
 [interactive]
   diffFilter = delta --color-only
 [diff]
