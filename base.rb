@@ -100,5 +100,21 @@ define :fisher do
   user node.user
 end
 
+define :pip, use_pipx: false do
+  if params[:use_pipx]
+    pip = "pipx"
+    condition = "pipx list | grep #{params[:name]}"
+  else
+    pip = "pip3"
+    condition = "pip3 show #{params[:name]}"
+  end
+  
+  execute "#{pip} install #{params[:name]}" do
+    user node[:user]
+    not_if "test $(#{condition} | wc -l) -gt 0"
+  end
+  user node.user
+end
+
 include_recipe "recipes/prelude/#{node.os}.rb"
 include_recipe "#{NODES_DIR}/#{node[:hostname]}.rb"
