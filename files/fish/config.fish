@@ -14,6 +14,8 @@ end
 switch (uname)
   case Linux
     source /usr/local/share/chruby/chruby.fish
+  case Darwin
+    set -x HOMEBREW_NO_AUTO_UPDATE 1
 end
 
 # commands which require binaries installed by homebrew need to come after this
