@@ -10,7 +10,7 @@ PACKAGES = %w{
 
 if node.distro == "fedora"
   include_local_recipe "flathub"
-  packages << %w{
+  PACKAGES + %w{
     fontawesome-fonts-all
     jetbrains-mono-fonts-all
   }

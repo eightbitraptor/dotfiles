@@ -4,7 +4,7 @@ if node.os == "linux"
   }
 
   if node.distro == "fedora"
-    packages << %w{
+    packages + %w{
       jetbrains-mono-nl-fonts
       jetbrains-mono-fonts
     }
