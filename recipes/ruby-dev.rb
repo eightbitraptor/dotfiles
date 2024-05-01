@@ -1,6 +1,7 @@
 tools = %w{
   ruby
   autoconf
+  automake
   bison
   gcc
   gdb
