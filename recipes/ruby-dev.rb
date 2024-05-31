@@ -39,6 +39,7 @@ ruby_deps.each do |package_pairs|
   end
 end
 
-unless File.exist?("#{node.home_dir}/.local/bin/compdb")
+# TODO: wtf Debian stopped allowing pip install...
+unless File.exist?("#{node.home_dir}/.local/bin/compdb") || node.distro == "ubuntu"
   execute "pip install --user git+https://github.com/Sarcasm/compdb.git#egg=compdb"
 end

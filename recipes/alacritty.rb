@@ -1,8 +1,14 @@
 packages = %w{
   alacritty
-  jetbrains-mono-nl-fonts
 }
   
+case node.distro
+when "fedora"
+  packages << jetbrains-mono-nl-fonts
+when "ubuntu"
+  packages << "fonts-jetbrains-mono"
+end
+
 packages.each do |pname|
   package pname do
     action :install

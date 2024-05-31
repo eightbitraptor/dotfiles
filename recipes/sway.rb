@@ -2,9 +2,7 @@ include_local_recipe "alacritty"
 include_local_recipe "wofi"
 
 packages = %w{
-  fontawesome-fonts
   python3-pip
-  azote
   sway
   swaylock
   qt5ct
@@ -15,6 +13,14 @@ packages = %w{
   package pkg_name do
     action :install
   end
+end
+
+case node.distro
+when "fedora"
+  packages << "fontawesome-fonts"
+  packages << "azote"
+when "ubuntu"
+  packages << "node-fortawesome-fontawesome-free"
 end
 
 dotfiles = {
@@ -42,7 +48,7 @@ dotfile_template ".config/waybar/config" do
 end
 
 # TODO: there is a better way to do this
-unless File.exist?("/usr/local/bin/wal")
+unless File.exist?("/usr/local/bin/wal") || node.distro == "ubuntu"
   execute "pip3 install pywal"
 end
 

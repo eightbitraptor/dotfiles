@@ -3,6 +3,7 @@ if node.os == "linux"
     emacs
   }
 
+  # should probably pull this out into a recipe
   if node.distro == "fedora"
     packages + %w{
       jetbrains-mono-nl-fonts
