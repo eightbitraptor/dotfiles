@@ -1,208 +1,130 @@
 {
-    //"layer": "top", // Waybar at top layer
-    "position": "bottom", // Waybar position (top|bottom|left|right)
-    //"gtk-layer-shell": true,
-    // "height": 28, // Waybar height (to be removed for auto height)
-    // "width": 1920, // Waybar width
-    // Choose the order of the modules
-    "modules-left": <%= @modules_left %>,
-    "modules-center": <%= @modules_center %>,
-    "modules-right": <%= @modules_right %>,
-    // Modules configuration
-    // "sway/workspaces": {
-    //     "disable-scroll": true,
-    //     "all-outputs": true,
-    //     "format": "{name}: {icon}",
-    //     "format-icons": {
-    //         "1": "",
-    //         "2": "",
-    //         "3": "",
-    //         "4": "",
-    //         "5": "",
-    //         "urgent": "",
-    //         "focused": "",
-    //         "default": ""
-    //     }
-    // },
+  "layer": "bottom", // Waybar at top layer
+  "position": "top", // Waybar position (top|bottom|left|right)
+  "height": "30",
+  "spacing": 10,
+  "modules-left": <%= @modules_left %>,
+  "modules-center": <%= @modules_center %>,
+  "modules-right": <%= @modules_right %>,
 
-    "sway/mode": {
-        "format": "<span style=\"italic\">{}</span>"
+  "sway/mode": {
+    "format": "<span style=\"italic\">{}</span>"
+  },
+
+  "mpd": {
+    "server": "127.0.0.1",
+    "port": 6600,
+    "tooltip": false,
+    "exec-if": "pgrep mpd",
+    "format": "{stateIcon} {consumeIcon}{randomIcon}{artist} - {title} ({elapsedTime:%M:%S}/{totalTime:%M:%S}) ",
+    "format-disconnected": "",
+    "format-stopped": "",
+    "unknown-tag": "N/A",
+    "interval": 2,
+    "max-length": 60,
+    "consume-icons": {
+      "on": " "
     },
-
-    "mpd": {
-        "server": "127.0.0.1",
-        "port": 6600,
-        "tooltip": false,
-        "exec-if": "pgrep mpd",
-        //"format": "{stateIcon} {consumeIcon}{randomIcon}{repeatIcon}{singleIcon}{artist} - {title} ({elapsedTime:%M:%S}/{totalTime:%M:%S}) ",
-        "format": "{stateIcon} {consumeIcon}{randomIcon}{artist} - {title} ({elapsedTime:%M:%S}/{totalTime:%M:%S}) ",
-//        "format-disconnected": "Disconnected ",
-//        "format-stopped": "{consumeIcon}{randomIcon}{repeatIcon}{singleIcon}Stopped ",
-        "format-disconnected": "",
-        "format-stopped": "",
-        "unknown-tag": "N/A",
-        "interval": 2,
-        "max-length": 60,
-        "consume-icons": {
-            "on": " "
-        },
-        "random-icons": {
-            "on": "<span color=\"#f53c3c\"></span> ",
-            "off": " "
-        },
-        "repeat-icons": {
-            "on": " "
-        },
-        "single-icons": {
-            "on": "1 "
-        },
-        "state-icons": {
-            "paused": "",
-            "playing": ""
-        }
+    "random-icons": {
+      "on": "<span color=\"#f53c3c\"></span> ",
+      "off": " "
     },
-
-    "idle_inhibitor": {
-        "format": "{icon}",
-        "format-icons": {
-            "activated": "",
-            "deactivated": ""
-        }
+    "repeat-icons": {
+      "on": " "
     },
-
-    "tray": {
-        // "icon-size": 21,
-        "spacing": 10
+    "single-icons": {
+      "on": "1 "
     },
-
-    "clock": {
-        "timezone": "Europe/London",
-        "format": "{:%H:%M %Z} ",
-        "format-alt": "{:%a, %b %d %C%y} ",
-        "tooltip": false,
-        "on-click-right": "gsimplecal"
-    },
-
-    "cpu": {
-        "format": "{usage}% ",
-        "on-click": "alacritty -e bash -ci htop --sort-key PERCENT_CPU"
-    },
-
-    "memory": {
-        "format": "{}% ",
-        "on-click": "alacritty -e bash -ci htop --sort-key PERCENT_MEM"
-    },
-
-    "temperature": {
-        // "thermal-zone": 2,
-        // "hwmon-path": "/sys/class/hwmon/hwmon2/temp1_input",
-        "critical-threshold": 80,
-        // "format-critical": "{temperatureC}°C {icon}",
-        "format": "{temperatureC}°C {icon}",
-        "format-icons": ["", "", ""]
-    },
-
-    "backlight": {
-        // "device": "acpi_video1",
-        "format": "{percent}% {icon}",
-        "format-icons": ["", ""]
-    },
-
-    "battery": {
-        "tooltip": false,
-        "states": {
-            "good": 95,
-            "warning": 20,
-            "critical": 15
-        },
-        "format": "{capacity}% {icon}",
-        "format-charging": "{capacity}% ",
-        "format-plugged": "{capacity}% ",
-        "format-alt": "{time} {icon}",
-        // "format-good": "", // An empty format will hide the module
-        // "format-full": "",
-        "format-icons": ["", "", "", "", ""]
-    },
-
-    // % calculated based on (!!) design capacity:
-    // upower -i /org/freedesktop/UPower/devices/battery_BAT0
-    "custom/bat0": {
-        "states": {
-            "good": 95,
-            "warning": 15,
-            "critical": 10
-        },
-        "exec": "~/.config/waybar/modules/battery.py BAT0",
-        // todo: exec-if not working script gets restarted when reloading sway
-        // "exec-if": "[ $(pgrep battery.py | wc -l) -lt 1 ]",
-        "return-type": "json",
-        "format": "{} {percentage}% {icon}",
-        "format-icons": ["", "", "", "", ""],
-        "tooltip": false,
-        "on-click-right": "kitty --start-as normal bash -i bat",
-    },
-
-    "network": {
-        "format-wifi": "{essid} ({signalStrength}%) ",
-        "format-ethernet": "{ifname}: {ipaddr}/{cidr}",
-        "format-linked": "{ifname} (No IP)",
-        "format-disconnected": "Disconnected ⚠",
-        "on-click-right": "alacritty --start-as normal bash -ci nmtui",
-        //"on-click": "kitty --start-as normal bash -ci what",
-        "format-alt": "{ifname}: {ipaddr}/{cidr}"
-    },
-
-    "custom/vpn":{
-        "format": "vpn {icon}",
-        "tooltip-format": "{icon}",
-        "exec": "~/.config/waybar/modules/vpn",
-        "return-type": "json",
-        "interval": 5,
-        "format-icons": ["",""]
-    },
-
-    "pulseaudio": {
-        "tooltip": false,
-        // "scroll-step": 1, // %, can be a float
-        "format": "{volume}% {icon} {format_source}",
-        "format-bluetooth": "{volume}% {icon}  {format_source}",
-        "format-bluetooth-muted": " {icon}  {format_source}",
-        "format-muted": " {format_source}",
-        "format-source": "{volume}% ",
-        "format-source-muted": "",
-        "format-icons": {
-            "headphone": "",
-            "hands-free": "",
-            "headset": "",
-            "phone": "",
-            "portable": "",
-            "car": "",
-            "default": ["", "", ""]
-        },
-        "on-click-right": "pavucontrol",
-        "on-click-middle": "pactl set-source-mute @DEFAULT_SOURCE@ toggle",
-        "on-click": "pactl set-sink-mute @DEFAULT_SINK@ toggle"
-    },
-
-		"bluetooth": {
-			"format": "{icon}",
-			"format-alt": "bluetooth: {status}",
-			"interval": 30,
-			"format-icons": {
-				"enabled": "",
-				"disabled": ""
-			},
-			"tooltip-format": "{status}"
-		},
-
-    "custom/weather": {
-        "format": "{}",
-        //"format-alt": "{alt}: {}",
-        //"format-alt-click": "click-left",
-        "interval": 300,
-        "return-type": "json",
-        "exec": "curl -s 'https://wttr.in/Canterbury?format=1' |jq --unbuffered --compact-output -M -R '{text:.}'",
-        "exec-if": "ping wttr.in -c1",
-        "on-click-right": "alacritty -e bash -ci ~/bin/wttr"
+    "state-icons": {
+      "paused": "",
+      "playing": ""
     }
+  },
+
+  "clock": {
+    "timezone": "Europe/London",
+    "interval": 60,
+    "tooltip": false,
+    "format": "{:%A %d %B %Y %I:%M %p}",
+    "on-click-right": "gsimplecal"
+  },
+
+  "battery": {
+    "tooltip": false,
+    "states": {
+      "good": 95,
+      "warning": 20,
+      "critical": 15
+    },
+    "format": "{capacity}% {icon}",
+    "format-charging": "{capacity}% ",
+    "format-plugged": "{capacity}% ",
+    "format-alt": "{time} {icon}",
+    "format-icons": ["", "", "", "", ""]
+  },
+
+  "custom/bat0": {
+    "states": {
+      "good": 95,
+      "warning": 15,
+      "critical": 10
+    },
+    "exec": "~/.config/waybar/modules/battery.py BAT0",
+    "return-type": "json",
+    "format": "{} {percentage}% {icon}",
+    "format-icons": ["", "", "", "", ""],
+    "tooltip": false,
+    "on-click-right": "alacritty --start-as normal bash -i bat"
+  },
+
+  "network": {
+    "format-wifi": "{essid} ({signalStrength}%) ",
+    "format-ethernet": "{ifname}: {ipaddr}/{cidr}",
+    "format-linked": "{ifname} (No IP)",
+    "format-disconnected": "Disconnected ⚠",
+    "on-click-right": "alacritty --start-as normal bash -ci nmtui",
+    "format-alt": "{ifname}: {ipaddr}/{cidr}"
+  },
+
+  "pulseaudio": {
+    "tooltip": false,
+    "format": "{volume}% {icon}",
+    //"format-bluetooth": "{volume}% {icon}  {format_source}",
+    //"format-bluetooth-muted": " {icon}  {format_source}",
+    "format-muted": " {format_source}",
+    //"format-source": "{volume}% ",
+    //"format-source-muted": "",
+    "format-icons": {
+      "headphone": "",
+      "hands-free": "",
+      "headset": "",
+      "phone": "",
+      "portable": "",
+      "car": "",
+      "default": ["", "", ""]
+    },
+    "on-click-right": "pavucontrol",
+    "on-click-middle": "pactl set-source-mute @DEFAULT_SOURCE@ toggle",
+    "on-click": "pactl set-sink-mute @DEFAULT_SINK@ toggle"
+  },
+
+  "bluetooth": {
+    "format": "{icon}",
+    "format-alt": "bluetooth: {status}",
+    "interval": 30,
+    "format-icons": {
+      "enabled": "",
+      "disabled": ""
+    },
+    "tooltip-format": "{status}"
+  },
+
+  "custom/weather": {
+    "format": "{}",
+    "interval": 300,
+    "return-type": "json",
+    "exec": "curl -s 'https://wttr.in/Canterbury?format=1' |jq --unbuffered --compact-output -M -R '{text:.}'",
+    "exec-if": "ping wttr.in -c1",
+    "on-click-right": "alacritty -e bash -ci ~/bin/wttr"
+  }
 }

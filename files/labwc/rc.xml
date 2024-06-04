@@ -2,6 +2,11 @@
 <labwc_config>
   <theme>
     <name>Afterpiece</name>
+    <cornerRadius>4</cornerRadius>
+    <dropShadows>yes</dropShadows>
+    <font>
+      <name>Intel One Mono</name>
+    </font>
   </theme>
 
   <core>
@@ -26,14 +31,6 @@
       <name>Aux3</name>
     </names>
   </desktops>
-
-  <theme>
-    <name>Nightmare</name>
-    <font place="ActiveWindow" name="Noto Sans" size="11" weight="Bold" />
-    <font place="InactiveWindow" name="Noto Sans" size="11" />
-    <font place="MenuItem" name="Noto Sans" size="11" />
-    <font place="OnScreenDisplay" name="Noto Sans" size="11" />
-  </theme>
 
   <keyboard>
     <numlock>off</numlock>

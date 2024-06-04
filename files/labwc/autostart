@@ -8,3 +8,5 @@
 # Set the wallpaper (from the previous session)
 swaybg -m center -i ~/Pictures/Wallpapers/wallhaven-rrwq7m.jpg &
 
+waybar &
+
