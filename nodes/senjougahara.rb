@@ -4,7 +4,7 @@ node.reverse_merge!(
   waybar_modules_right: ["pulseaudio", "tray"],
 
   mconfig: <<~MCONFIG
-    output 'LG Electronics LG HDR 4K 0x00007E8D' pos 0 0 scale 1.5
+    output 'HDMI-A-2' pos 0 0 scale 1.25
   MCONFIG
 )
 
