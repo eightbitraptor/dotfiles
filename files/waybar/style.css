@@ -24,6 +24,10 @@ window#waybar {
 #workspaces button.active {
     background-image: linear-gradient(0deg, @purple, @selection);
 }
+#workspaces button.focused {
+  background: @background;
+  font-weight: bold;
+}
 #taskbar button.active {
     background-image: linear-gradient(0deg, @selection, @background-darker);
 }
