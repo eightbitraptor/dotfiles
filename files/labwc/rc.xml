@@ -12,7 +12,7 @@
   <core>
     <adaptiveSync>yes</adaptiveSync>
     <reuseOutputMode>yes</reuseOutputMode>
-    <gaps>10</gaps>
+    <gap>4</gap>
   </core>
 
   <resistance>
