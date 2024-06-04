@@ -16,6 +16,7 @@ dotfiles = {
   ".config/labwc/rc.xml" => "labwc/rc.xml",
   ".config/labwc/autostart" => "labwc/autostart",
   ".config/labwc/environment" => "labwc/environment",
+  ".config/labwc/themerc-override" => "labwc/themerc-override",
   ".config/kanshi/config" => "kanshi/#{node.hostname}.config",
 }
 dotfile dotfiles
