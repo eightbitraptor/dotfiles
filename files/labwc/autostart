@@ -1,11 +1,10 @@
-# Set the wallpaper (from the previous session)
-~/.azotebg
-
 # Use Caps lock key as a third CTRL key
-/usr/bin/setxkbmap -option "ctrl:nocaps" &
+# Don't need this with my new keyboards as they are all using custom firmware
+#/usr/bin/setxkbmap -option "ctrl:nocaps" &
 
 # Kanshi manages monitor config and scaling
-/usr/bin/kanshi
+/usr/bin/kanshi &
 
-# Waybar - For the system tray mainly.
-/usr/bin/waybar -c ~/.config/waybar/config &
+# Set the wallpaper (from the previous session)
+swaybg -m center -i ~/Pictures/Wallpapers/wallhaven-rrwq7m.jpg &
+

@@ -42,6 +42,9 @@
   <item label="Terminal">
     <action name="Execute" command="alacritty" />
   </item>
+  <item label="Music">
+    <action name="Execute" command="/opt/deadbeef/deadbeef" />
+  </item>
   <item label="Emacs">
     <action name="Execute" command="emacs" />
   </item>

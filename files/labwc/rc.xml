@@ -1,21 +1,29 @@
 <?xml version="1.0"?>
 <labwc_config>
+  <theme>
+    <name>Afterpiece</name>
+  </theme>
+
   <core>
     <adaptiveSync>yes</adaptiveSync>
     <reuseOutputMode>yes</reuseOutputMode>
-    <gaps>4</gaps>
+    <gaps>10</gaps>
   </core>
 
   <resistance>
     <screen_edge_strength>20</screen_edge_strength>
   </resistance>
 
+  <windowSwitcher show="yes" preview="no" outlines="no" allWorkspaces="no" />
+
   <desktops>
-    <number>2</number>
+    <number>4</number>
     <firstdesk>1</firstdesk>
     <names>
       <name>Main</name>
-      <name>Aux</name>
+      <name>Aux1</name>
+      <name>Aux2</name>
+      <name>Aux3</name>
     </names>
   </desktops>
 
@@ -32,15 +40,35 @@
     <default />
 
     <keybind key="W-l">
-      <action name="execute" command="i3lock" />
+      <action name="execute" command="swaylock" />
+    </keybind>
+
+    <keybind key="W-Return">
+      <action name="execute" command="alacritty" />
+    </keybind>
+
+    <keybind key="W-m">
+      <action name="execute" command="/opt/deadbeef/deadbeef" />
+    </keybind>
+
+    <keybind key="C-Space">
+      <action name="Execute" command="wofi --show drun" />
     </keybind>
 
     <keybind key="W-S-q">
       <action name="Close"/>
     </keybind>
 
-    <keybind key="C-Space">
-      <action name="Execute" command="wofi --show drun" />
+    <keybind key="W-S-l">
+      <action name="GoToDesktop" to="right" />
+    </keybind>
+
+    <keybind key="W-S-h">
+      <action name="GoToDesktop" to="left" />
+    </keybind>
+
+    <keybind key="C-A-Return">
+      <action name="ToggleMaximize" />
     </keybind>
   </keyboard>
 </labwc_config>
