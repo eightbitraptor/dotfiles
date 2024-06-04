@@ -164,20 +164,6 @@ mode "$mode_system" {
 }
 bindsym $mod+Ctrl+BackSpace mode "$mode_system"
 
-# TODO (leftover i3 config): Do I even need this anymore - it's busted in sway
-set $mode_screens System (l) laptop only, (w) work externals, (m) mirror, (h) home external
-mode "$mode_screens" {
-    bindsym l exec --no-startup-id $HOME/.screenlayout/laptop_only.sh, mode "default"
-    bindsym w exec --no-startup-id $HOME/.screenlayout/work_both_external.sh, mode "default"
-    bindsym m exec --no-startup-id $HOME/.screenlayout/mirror.sh, mode "default"
-    bindsym h exec --no-startup-id $HOME/.screenlayout/home_monitor.sh, mode "default"
-
-    # back to normal: Enter or Escape
-    bindsym Return mode "default"
-    bindsym Escape mode "default"
-}
-bindsym $mod+Ctrl+s mode "$mode_screens"
-
 bar {
   swaybar_command waybar
 }
