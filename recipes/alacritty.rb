@@ -4,7 +4,7 @@ packages = %w{
   
 case node.distro
 when "fedora"
-  packages << jetbrains-mono-nl-fonts
+  packages << "jetbrains-mono-nl-fonts"
 when "ubuntu"
   packages << "fonts-jetbrains-mono"
 end
