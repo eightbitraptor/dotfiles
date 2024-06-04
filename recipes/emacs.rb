@@ -24,8 +24,12 @@ else
   "git@github.com:eightbitraptor/dotemacs"
 end
 
-git "Emacs config" do
-  repository emacs_repo
-  user node.user
-  destination "#{node.home_dir}/.emacs.d"
+emacs_destination = "#{node.home_dir}/.emacs.d"
+
+if !Dir.exist? emacs_destination
+  git "Emacs config" do
+    repository emacs_repo
+    user node.user
+    destination emacs_destination
+  end
 end
