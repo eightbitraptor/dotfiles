@@ -48,7 +48,7 @@
   <item label="Emacs">
     <action name="Execute" command="emacs" />
   </item>
-  <seperator />
+  <separator />
   <item label="Reconfigure">
     <action name="Reconfigure" />
   </item>
