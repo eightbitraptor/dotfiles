@@ -6,6 +6,8 @@ packages = %w{
   python3-pip
   sway
   swaylock
+  slurp
+  grim
   qt5ct
   wofi
   light
