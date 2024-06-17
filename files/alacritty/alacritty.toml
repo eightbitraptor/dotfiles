@@ -52,7 +52,7 @@ family = "JetBrains Mono"
 [[keyboard.bindings]]
 action = "SpawnNewInstance"
 key = "N"
-mods = "Control"
+mods = "Control|Shift"
 
 [[keyboard.bindings]]
 action = "Paste"
