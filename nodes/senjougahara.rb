@@ -4,7 +4,7 @@ node.reverse_merge!(
   waybar_modules_right: ["pulseaudio", "tray"],
 
   mconfig: <<~MCONFIG
-    output 'HDMI-A-1' pos 0 0 scale 1.5 bg ~/Pictures/Wallpapers/wallhaven-rrwq7m.jpg center
+    output 'HDMI-A-2' pos 0 0 bg ~/Pictures/Wallpapers/wallhaven-rrwq7m.jpg center
   MCONFIG
 )
 
@@ -31,3 +31,4 @@ include_local_recipe "neovim"
 include_local_recipe "abcde"
 include_local_recipe "gdb"
 include_local_recipe "ruby-dev"
+include_local_recipe "rust"
