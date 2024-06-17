@@ -4,7 +4,7 @@ node.reverse_merge!(
   waybar_modules_right: ["pulseaudio", "tray"],
 
   mconfig: <<~MCONFIG
-    output 'HDMI-A-2' pos 0 0 bg ~/Pictures/Wallpapers/wallhaven-rrwq7m.jpg center
+    output 'HDMI-A-2' pos 0 0 bg ~/Pictures/Wallpapers/wallhaven-rrwq7m.jpg fill
   MCONFIG
 )
 
