@@ -6,7 +6,6 @@ set print pretty on
 set history save on
 set history filename ~/.gdb_history
 
-add-auto-load-safe-path /home/mattvh/miniruby-gdb.py
-add-auto-load-safe-path /home/mattvh/git/ruby/.gdbinit
+set auto-load safe-path /
 
 set confirm off
