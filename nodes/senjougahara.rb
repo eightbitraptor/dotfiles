@@ -3,9 +3,21 @@ node.reverse_merge!(
   waybar_modules_center: ["clock", "custom/weather"],
   waybar_modules_right: ["pulseaudio", "tray"],
 
-  mconfig: <<~MCONFIG
-    output 'HDMI-A-2' pos 0 0 bg ~/Pictures/Wallpapers/wallhaven-rrwq7m.jpg fill
+  mconfig: <<~MCONFIG,
+    output 'HDMI-A-2' scale 1.25 pos 0 0 bg ~/Pictures/Wallpapers/wallhaven-rrwq7m.jpg fill
   MCONFIG
+
+  swayfx_config: <<~SCONFIG,
+    gaps inner 4
+    gaps outer 4
+
+    blur enable
+    shadows enable
+    shadow_blur_radius 50
+    shadow_offset 0 0
+    corner_radius 6
+    default_dim_inactive 0.25
+  SCONFIG
 )
 
 # Disable USB hub suspend. This is required for the Yubikey to be detected

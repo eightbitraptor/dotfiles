@@ -4,7 +4,6 @@ include_local_recipe "waybar"
 
 packages = %w{
   python3-pip
-  sway
   swaylock
   slurp
   grim
@@ -19,9 +18,11 @@ end
 
 case node.distro
 when "fedora"
+  packages << "swayfx"
   packages << "fontawesome-fonts"
   packages << "azote"
 when "ubuntu"
+  packages << "sway"
   packages << "node-fortawesome-fontawesome-free"
 end
 
@@ -34,7 +35,8 @@ dotfiles = {
 dotfile_template ".config/sway/config" do
   source "sway/config.erb"
   variables(
-    monitor_config: node.mconfig
+    monitor_config: node.mconfig,
+    swayfx_config: node.swayfx_config
   )
 end
 
