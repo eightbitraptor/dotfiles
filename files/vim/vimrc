@@ -24,6 +24,7 @@ Plug 'preservim/tagbar'
 Plug 'tpope/vim-vinegar'
 Plug 'bfrg/vim-cpp-modern'
 Plug 'vim-scripts/VimCompletesMe'
+Plug 'ntpeters/vim-better-whitespace'
 
 " Ruby/Rails
 Plug 'vim-ruby/vim-ruby'
@@ -147,11 +148,15 @@ augroup PythonShenanigans
     \ nnoremap ;t :w\|:!nosetests %<cr>
 augroup END
 
+let g:cpp_attributes_highlight = 1
+let g:cpp_member_highlight = 1
+
 augroup CShenanigans
   au!
   autocmd BufRead,BufNewFile *.c,*.h
         \ set filetype=c |
         \ set tabstop=8 shiftwidth=4 smarttab expandtab |
+  autocmd BufRead *.c   setlocal cinoptions=l1
   autocmd BufRead */ruby/*.c   setlocal cinoptions=:2,=2,l1
 augroup END
 
@@ -186,7 +191,7 @@ function! DoneTagging(channel)
 endfunction
 
 function! Taggit()
-    let job = job_start("ctags --tag-relative=yes --extras=+f -Rf.git/tags --languages=-javascript,sql,TypeScript --exclude=.ext --exclude=include/ruby-\* --exclude=rb_mjit_header.h .", { 'close_cb': 'DoneTagging'})
+    let job = job_start("ctags --tag-relative=yes --extras=+f -Rf.git/tags --languages=-javascript,sql,TypeScript --exclude=.ext --exclude=rb_mjit_header.h .", { 'close_cb': 'DoneTagging'})
 endfunction
 
 " Tags
