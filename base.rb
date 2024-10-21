@@ -1,5 +1,3 @@
-puts ENV['PATH']
-
 $os = run_command('uname').stdout.strip.downcase
 $home_dir = case $os
 when "linux"
