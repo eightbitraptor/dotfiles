@@ -14,12 +14,20 @@ else
   "not-linux"
 end
 
+begin
+  $git_host = ENV.fetch("EBR_GIT_HOST")
+rescue KeyError
+  $stderr.puts "EBR_GIT_HOST not defined, Please configure this to be the internal Git server address"
+  exit 1
+end
+
 node.reverse_merge!(
   os: $os,
   distro: $distro,
   hostname: run_command('hostname').stdout.split('.').first.downcase.strip,
   user: ENV['SUDO_USER'] || ENV['USER'],
   home_dir: $home_dir,
+  git_host: $git_host,
 )
 
 REPO_ROOT   = File.dirname(__FILE__)
@@ -112,6 +120,16 @@ define :pip, use_pipx: false do
     not_if "test $(#{condition} | wc -l) -gt 0"
   end
   user node.user
+end
+
+define :personal_git, destination: nil do
+  params[:destination] ? params[:destination] : "#{node.home_dir}/git/#{params[:name]}"
+
+  git "Personal #{params[:name]} repo" do
+    repository "#{node.git_host}/#{params[:name]}.git"
+    user node.user
+    destination params[:destination]
+  end
 end
 
 include_recipe "recipes/prelude/#{node.os}.rb"
