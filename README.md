@@ -44,7 +44,14 @@ As a general rule, try not to add new code to the preludes.
 * `hitomi` - Development Laptop, Microsoft Surface Pro 7 i7, Fedora 37, kernel
   from the [linux surface](https://github.com/linux-surface/linux-surface)
   project.
-* `shopify-mvh` - Work laptop, Macbook Pro M1 Pro, macOS
+* `fern` - A temporary node, [Bug
+  #1162](https://github.com/linux-surface/linux-surface/issues/1162) in the
+  linux-surface project is making it necessary to use Ubunut on my Surface Pro
+  for now.
+* `miyoshi` - Work laptop, Macbook Pro M3, macOS
+* `spin` - A basic editing environment when used with [Spin, Shopify's internal
+  cloud dev
+  env](https://shopify.engineering/shopifys-cloud-development-journey)
 
 ### recipes
 
