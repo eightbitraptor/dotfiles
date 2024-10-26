@@ -4,7 +4,7 @@ node.reverse_merge!(
   waybar_modules_right: ["pulseaudio", "tray"],
 
   mconfig: <<~MCONFIG,
-    output 'HDMI-A-2' scale 1.25 pos 0 0 bg ~/Pictures/Wallpapers/wallhaven-rrwq7m.jpg fill
+    output 'HDMI-A-2' scale 1.5 pos 0 0 bg ~/Pictures/Wallpapers/wallhaven-rrwq7m.jpg fill
   MCONFIG
 
   swayfx_config: <<~SCONFIG,
