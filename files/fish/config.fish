@@ -29,6 +29,6 @@ if test -f /opt/dev/dev.fish
 end
 
 direnv hook fish | source
-chruby 3.3.1
+chruby 3.3.3
 
 #status --is-interactive; and ~/.rbenv/bin/rbenv init - fish | source
