@@ -19,7 +19,7 @@ when "ubuntu"
 end
 
 ruby_deps = [
-  {fedora: "zlib-devel",      ubuntu: "zlib1g-dev"},
+  {fedora: "zlib-ng-compat-devel",      ubuntu: "zlib1g-dev"},
   {fedora: "libffi-devel",    ubuntu: "libffi-dev"},
   {fedora: "readline-devel",  ubuntu: "libreadline-dev"},
   {fedora: "gdbm-devel",      ubuntu: "libgdbm-dev"},

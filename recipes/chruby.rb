@@ -1,10 +1,11 @@
-packages = %w{
-  wget
-  make
-}
-packages.each do
-  package _1 do
-     action :install
+packages = [
+  {fedora: "wget2-wget", ubuntu: "wget"},
+  {fedora: "make", ubuntu: "make"},
+]
+
+packages.each do |package_pairs|
+  package package_pairs[node.distro.intern] do
+    action :install
   end
 end
 

@@ -1,11 +1,11 @@
-packages = %w{
-  fish
-  wget
-  direnv
-}
+packages = [
+  {fedora: "wget2-wget", ubuntu: "wget"},
+  {fedora: "fish", ubuntu: "fish"},
+  {fedora: "direnv", ubuntu: "direnv"},
+]
 
-packages.each do |pname|
-  package pname do
+packages.each do |package_pairs|
+  package package_pairs[node.distro.intern] do
     action :install
   end
 end
