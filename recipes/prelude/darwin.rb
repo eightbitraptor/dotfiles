@@ -1,11 +1,16 @@
-include_local_recipe "prelude/shared"
+include_local_recipe "git"
+
+unless node.hostname == "spin"
+  personal_git "scripts" do
+    destination "#{node.home_dir}/.scripts"
+  end
+end
 
 # TODO: the ruby-dev recipe installs bear but is Linux only.
 # TODO: pipx is only necessary because dev messes up the python
 #       install on the work mac.
 PACKAGES = %w{ 
   mg
-  git
   htop
   tig
   bear

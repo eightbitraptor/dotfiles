@@ -1,8 +1,13 @@
-include_local_recipe "prelude/shared"
+include_local_recipe "git"
+
+unless node.hostname == "spin"
+  personal_git "scripts" do
+    destination "#{node.home_dir}/.scripts"
+  end
+end
 
 PACKAGES = %w{ 
   mg
-  git
   tig
   htop 
   ruby
