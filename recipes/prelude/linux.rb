@@ -1,26 +1,25 @@
 include_local_recipe "git"
 
+case node.distro
+when "fedora"
+  include_local_recipe "prelude/distro/fedora"
+when "void"
+  include_local_recipe "prelude/distro/void"
+end
+
 unless node.hostname == "spin"
   personal_git "scripts" do
     destination "#{node.home_dir}/.scripts"
   end
 end
 
-PACKAGES = %w{ 
+%w{ 
   mg
   tig
   htop 
   ruby
-}
-
-if node.distro == "fedora"
-  include_local_recipe "flathub"
-  PACKAGES + %w{
-    fontawesome-fonts-all
-    jetbrains-mono-fonts-all
-  }
-end
-
-PACKAGES.each do |pkg|
-  package(pkg) { action :install }
+}.each do |pkg|
+  package pkg do
+    action :install
+  end
 end
