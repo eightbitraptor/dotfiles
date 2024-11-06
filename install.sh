@@ -1,14 +1,15 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
-set -e
-
-source bin/setup.sh
+. bin/setup.sh
 
 log_level="${EBR_LOG_LEVEL:-info}"
 
-if [[ `uname -s` == "Darwin" ]]; then
-  ./bin/mitamae local "base.rb" --log-level=$log_level
-else
-  sudo -E ./bin/mitamae local "base.rb" --log-level=$log_level
-fi
+MITAMAE_CMD="./bin/mitamae local base.rb --log-level=$log_level"
 
+if [ ! `which sudo 2>/dev/null` ]; then
+  su -c '$MITAMAE_CMD'
+elif [ `uname -s` = "Darwin" ]; then
+  $MITAMAE_CMD
+else
+  sudo -E $MITAMAE_CMD
+fi
