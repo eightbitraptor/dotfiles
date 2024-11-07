@@ -14,11 +14,10 @@ else
   "not-linux"
 end
 
-begin
-  $git_host = ENV.fetch("EBR_GIT_HOST")
+$git_host = begin
+  ENV.fetch("EBR_GIT_HOST")
 rescue KeyError
   $stderr.puts "EBR_GIT_HOST not defined, Please configure this to be the internal Git server address"
-  exit 1
 end
 
 node.reverse_merge!(
@@ -125,10 +124,14 @@ end
 define :personal_git, destination: nil do
   params[:destination] ? params[:destination] : "#{node.home_dir}/git/#{params[:name]}"
 
-  git "Personal #{params[:name]} repo" do
-    repository "#{node.git_host}/#{params[:name]}.git"
-    user node.user
-    destination params[:destination]
+  if node.git_host
+    git "Personal #{params[:name]} repo" do
+      repository "#{node.git_host}/#{params[:name]}.git"
+      user node.user
+      destination params[:destination]
+    end
+  else
+    MItamae.logger.warn("EBR_GIT_HOST not configured, skipping clone of #{params[:name]}")
   end
 end
 
