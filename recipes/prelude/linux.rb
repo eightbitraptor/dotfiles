@@ -1,4 +1,5 @@
 include_local_recipe "git"
+include_local_recipe "ssh"
 
 case node.distro
 when "fedora"
