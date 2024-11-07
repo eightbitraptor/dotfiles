@@ -31,5 +31,6 @@ if !Dir.exist? emacs_destination
     repository emacs_repo
     user node.user
     destination emacs_destination
+    only_if "test `git -o StrictHostKeyChecking=No -T git@github.com` -eq 0"
   end
 end
