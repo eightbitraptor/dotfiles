@@ -11,4 +11,3 @@ execute "Installing Rustup" do
   user node.user
   not_if "test -e #{node.home_dir}/.cargo"
 end
-  

@@ -1,4 +1,4 @@
-if set -q ALACRITTY_LOG
+if test -f ~/.cache/wal/sequences
   cat ~/.cache/wal/sequences
 end
 
@@ -29,6 +29,6 @@ if test -f /opt/dev/dev.fish
 end
 
 direnv hook fish | source
-chruby 3.3.3
+chruby 3.3.6
 
 #status --is-interactive; and ~/.rbenv/bin/rbenv init - fish | source

@@ -1,25 +1,57 @@
-# Fern
-# Microsoft Surface Pro 7, i7-1065G, 32G, 512GB
-# Temporary Ubuntu install while Fedora is unbootable due to the MS UEFI Update
-
-
+# Fern - Thinkpad X1 Carbon gen 6
+# i7 8550U, 16Gb - purchased Nov 2024
 node.reverse_merge!(
   waybar_modules_left: ["sway/workspaces", "sway/mode"],
-  waybar_modules_center: ["mpd"],
-  waybar_modules_right: ["idle_inhibitor", "tray", "memory", "cpu", "pulseaudio", "network", "battery", "clock"],
+  waybar_modules_center: ["clock", "custom/weather"],
+  waybar_modules_right: ["network", "battery", "tray"],
 
-  mconfig: <<~MCONFIG
-    output eDP-1 pos 0 0 scale 1.75
+  mconfig: <<~MCONFIG,
+    output eDP-1 pos 0 0 scale 1 bg ~/pics/fern.jpg fill
   MCONFIG
+
+  swayfx_config: <<~SCONFIG,
+    gaps inner 4
+    gaps outer 4
+
+    blur enable
+    shadows enable
+    shadow_blur_radius 50
+    shadow_offset 0 0
+    default_dim_inactive 0.25
+  SCONFIG
+
+  sway_mod: "Mod1",
+
+  greetd_environments: <<~ENVS,
+    sway
+  ENVS
 )
 
+%w{
+  intel-media-driver
+  mesa-dri
+  vulkan-loader
+  mesa-vulkan-intel
+  tlp
+}.each do |pname|
+  package pname do
+    action :install
+  end
+end
 
-include_local_recipe "emacs"
-include_local_recipe "vim"
+void_service "tlp" do
+  action [:enable, :start]
+end
+
+include_local_recipe "greetd"
 include_local_recipe "sway"
+
 include_local_recipe "fish"
+include_local_recipe "abcde"
 include_local_recipe "fish-chruby"
-
-include_local_recipe "mpv"
-
+include_local_recipe "tmux"
+include_local_recipe "vim"
+include_local_recipe "alacritty"
 include_local_recipe "ruby-dev"
+include_local_recipe "rust"
+

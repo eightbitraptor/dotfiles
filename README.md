@@ -41,13 +41,7 @@ As a general rule, try not to add new code to the preludes.
 ### nodes
 
 * `senjougahara` - Development Desktop, Fedora 37.
-* `hitomi` - Development Laptop, Microsoft Surface Pro 7 i7, Fedora 37, kernel
-  from the [linux surface](https://github.com/linux-surface/linux-surface)
-  project.
-* `fern` - A temporary node, [Bug
-  #1162](https://github.com/linux-surface/linux-surface/issues/1162) in the
-  linux-surface project is making it necessary to use Ubunut on my Surface Pro
-  for now.
+* `fern` - Personal Laptop, Thinkpad X1 Carbon gen 6, i7-8550U, Void Linux.
 * `miyoshi` - Work laptop, Macbook Pro M3, macOS
 * `spin` - A basic editing environment when used with [Spin, Shopify's internal
   cloud dev

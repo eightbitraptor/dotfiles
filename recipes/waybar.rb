@@ -1,10 +1,13 @@
-package "waybar" do
+pname = {
+  ubuntu: "waybar", fedora: "waybar", void: "Waybar"
+}
+
+package pname[node.distro.intern] do
   action :install
 end
 
 dotfiles = {
   ".config/waybar/style.css" => "waybar/style.css",
-  ".config/waybar/colors.css" => "waybar/colors.css",
   ".config/waybar/modules/battery.py" => "waybar/battery.py",
 }
 

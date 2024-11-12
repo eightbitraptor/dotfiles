@@ -1,7 +1,7 @@
 packages = [
-  {fedora: "wget2-wget", ubuntu: "wget"},
-  {fedora: "fish", ubuntu: "fish"},
-  {fedora: "direnv", ubuntu: "direnv"},
+  {fedora: "wget2-wget", ubuntu: "wget", void: "wget"},
+  {fedora: "fish", ubuntu: "fish", void: "fish-shell"},
+  {fedora: "direnv", ubuntu: "direnv", void:"direnv"},
 ]
 
 packages.each do |package_pairs|

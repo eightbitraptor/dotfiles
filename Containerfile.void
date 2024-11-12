@@ -1,0 +1,7 @@
+FROM voidlinux/voidlinux
+
+RUN echo "voidtest" > /etc/hostname
+
+ADD . /dotfiles
+WORKDIR /dotfiles
+run ./install.sh

@@ -1,6 +1,6 @@
 packages = [
-  {fedora: "wget2-wget", ubuntu: "wget"},
-  {fedora: "make", ubuntu: "make"},
+  { fedora: "wget2-wget", ubuntu: "wget", void: "wget" },
+  { fedora: "make", ubuntu: "make", void: "make" },
 ]
 
 packages.each do |package_pairs|
@@ -20,7 +20,7 @@ end
 execute "Extract Chruby" do
   command "tar zxvf /tmp/chruby.tar.gz"
   cwd "/tmp"
-  only_if "test -e /tmp/chruby-#{chruby_version}"
+  only_if "test -e /tmp/chruby.tar.gz"
 end
 
 execute "install Chruby" do

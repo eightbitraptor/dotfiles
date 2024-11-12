@@ -1,13 +1,8 @@
+include_local_recipe "jetbrains-font"
+
 packages = %w{
   alacritty
 }
-  
-case node.distro
-when "fedora"
-  packages << "jetbrains-mono-nl-fonts"
-when "ubuntu"
-  packages << "fonts-jetbrains-mono"
-end
 
 packages.each do |pname|
   package pname do

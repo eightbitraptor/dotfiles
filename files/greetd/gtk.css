@@ -1,0 +1,23 @@
+window {
+  background-image: url("file:///usr/share/backgrounds/fern.jpg");
+  background-size: cover;
+  background-position: center;
+}
+
+label#clock {
+  margin-left: 1200px;
+  color: rgba(220, 220, 220, 0.1);
+}
+
+box#body {
+  font-family: Noto Sans;
+  font-size: 18px;
+  font-weight: bold;
+
+  color: rgba(200, 200, 200, 1);
+  background-color: rgba(50, 50, 50, 0.9);
+  border-radius: 10px;
+  padding: 50px;
+  margin-left: 875px;
+}
+

@@ -2,28 +2,43 @@
 
 include /etc/sway/config.d/*
 
-exec cat ~/.cache/wal/sequences
+exec --no-startup-id wal -i /usr/share/backgrounds/<%= @hostname %>.jpg
 
-set $mod Mod4
+set $mod <%= @sway_mod %>
 floating_modifier $mod
 
 font pango:Noto Sans 12
 
-input "1118:2496:Microsoft_Surface_Type_Cover_Keyboard" {
+input type:keyboard {
     xkb_layout gb
-    xkb_options ctrl:nocaps	
+    xkb_options ctrl:nocaps
+}
+
+input "18003:1:foostan_Corne" {
+    xkb_layout us
+}
+
+input type:touchpad {
+    dwt enabled
+    dwtp enabled
+    tap enable
+    natural_scroll enabled
+    middle_emulation enabled
 }
 
 <%= @monitor_config %>
-exec ~/.azotebg
 
-exec swayidle \
-    timeout 300 'swaylock -c 21202c' \
-    timeout 600 'swaymsg "output * dpms off"' \
-      resume 'swaymsg "output * dpms on"' \
-    before-sleep 'swaylock -c 21202c' \
-
-exec --no-startup-id fcitx5 -d
+# Monitor off at 5 mins
+# screen locked at 10 mins.
+# if the screen is locked and the screen wakes, turn it off again after 15 secs
+# of idle.
+# lock the screen when suspending
+exec swayidle -w \
+    timeout 300 'swaymsg "output * dpms off"' \
+    timeout 600 'swaylock' \
+    timeout 15 'if pgrep -x swaylock; then swaymsg "output * dpms off"; fi' \
+    resume 'swaymsg "output * dpms on"' \
+    before-sleep 'swaylock'
 
 <%= @swayfx_config %>
 
@@ -35,10 +50,9 @@ bindsym Menu+Up    exec light -T 1.4
 bindsym Menu+Down  exec light -T 0.72
 
 bindsym $mod+Return exec alacritty
-bindsym $mod+Shift+q kill
+bindsym $mod+q kill
 
-bindsym $mod+d exec wofi --show drun
-bindsym $mod+Shift+d exec wofi --show run
+bindsym $mod+d exec fuzzel
 
 bindsym $mod+h focus left
 bindsym $mod+j focus down
@@ -113,7 +127,6 @@ bindsym $mod+Shift+0 move container to workspace $workspace10
 
 bindsym $mod+Shift+c reload
 bindsym $mod+Shift+r restart
-bindsym $mod+Shift+e exec "i3-nagbar -t warning -m 'You pressed the exit shortcut. Do you really want to exit i3? This will end your X session.' -b 'Yes, exit i3' 'i3-msg exit'"
 
 # Pulse Audio Controls {{{
 bindsym XF86AudioMute        exec --no-startup-id pactl set-sink-mute   0 toggle
@@ -179,8 +192,8 @@ bar {
   swaybar_command waybar
 }
 
-for_window [class="^.*"] border pixel 2
 for_window [app_id="mpv"] floating enable
 for_window [app_id="org.kde.dolphin"] floating enable
 
-default_border pixel 3
+default_border pixel 2
+

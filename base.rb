@@ -9,7 +9,7 @@ end
 $distro = case $os
 when "linux"
   run_command("awk '/^ID=/' /etc/*-release | tr -d 'ID='")
-    .stdout.strip
+    .stdout.strip.gsub('"','')
 else
   "not-linux"
 end
@@ -62,7 +62,7 @@ define :dotfile, source: nil, owner: node[:user] do
   else
     params[:name]
   end
-    
+
   links.each do |to, from|
     destination = File.expand_path(to, node[:home_dir])
     dest_dir    = File.dirname(destination)
@@ -80,7 +80,7 @@ define :dotfile, source: nil, owner: node[:user] do
   end
 end
 
-define :systemd_service, enable: false do 
+define :systemd_service, enable: false do
   Array(params[:action]).each do |action|
     case action
     when :enable
@@ -113,7 +113,7 @@ define :pip, use_pipx: false do
     pip = "pip3"
     condition = "pip3 show #{params[:name]}"
   end
-  
+
   execute "#{pip} install #{params[:name]}" do
     user node[:user]
     not_if "test $(#{condition} | wc -l) -gt 0"
@@ -132,6 +132,42 @@ define :personal_git, destination: nil do
     end
   else
     MItamae.logger.warn("EBR_GIT_HOST not configured, skipping clone of #{params[:name]}")
+  end
+end
+
+# TODO: Upstream a fix to specinfra et al. the runit enable check is incorrect
+define :void_service, action: :nothing do
+  actions = Array(params[:action])
+  name = params[:name]
+
+  unless Dir.exists?("/etc/sv/#{name}")
+    MItamae.logger.error("Service name #{name} doesn't exist")
+  end
+
+  # sort the array, because we want to enable before we start
+  actions.sort.each do |action|
+    case action
+    when :enable
+      MItamae.logger.debug("enabling #{name}")
+      unless Dir.exists?("/var/service/#{name}")
+        system("ln -s /etc/sv/#{name} /var/service/")
+      end
+    when :start
+      MItamae.logger.debug("starting #{name}")
+      system("sv up #{name}")
+    else
+      MItamae.logger.error("void_service, valid actions are :create, :start")
+    end
+  end
+end
+
+define :group_add, user: node.user do
+  name = params[:name]
+  user = params[:user]
+
+  execute "add #{user} to #{name} group" do
+    command "usermod -aG #{name} #{user}"
+    not_if "groups #{user} | grep #{name}"
   end
 end
 

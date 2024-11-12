@@ -24,3 +24,10 @@ git "Tmux package manager" do
   user node.user
   destination "#{node.home_dir}/.tmux/plugins/tpm"
 end
+
+if node.distro == "void"
+  execute "Create terminfo" do
+    command "cp /usr/share/terminfo/s/screen-256color /usr/share/terminfo/t/tmux-256color"
+    not_if "test -e /usr/share/terminfo/t/tmux-256color"
+  end
+end
