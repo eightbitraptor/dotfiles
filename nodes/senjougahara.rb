@@ -1,3 +1,5 @@
+# Senjougahara - My Main Desktop machine
+# Ryzen 5 3600, 16Gb, hand built
 node.reverse_merge!(
   waybar_modules_left: ["sway/workspaces", "sway/mode"],
   waybar_modules_center: ["clock", "custom/weather"],
