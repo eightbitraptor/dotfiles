@@ -16,6 +16,13 @@
   noto-fonts-ttf
   noto-fonts-cjk
   ImageMagick
+  Thunar
+  gvfs
+  gvfs-smb
+  gvfs-cdda
+  smbclient
+  samba
+  polkit
 }.each do |pname|
   package pname do
     action :install
@@ -25,6 +32,8 @@ end
 group_add "_seatd"
 group_add "socklog"
 group_add "bluetooth"
+group_add "storage"
+group_add "network"
 
 link "/etc/greetd/config.toml" do
   to "#{FILES_DIR}/greetd/config.toml"
