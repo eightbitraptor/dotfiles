@@ -52,9 +52,21 @@ end
 directory "#{node.home_dir}/.config/service/dbus" do
   owner node.user
 end
-
 remote_file "#{node.home_dir}/.config/service/dbus/run" do
   source "/usr/share/examples/turnstile/dbus.run"
+end
+
+directory "#{node.home_dir}/.config/service/dbus/log" do
+  owner node.user
+end
+file "#{node.home_dir}/.config/service/dbus/log/run" do
+  content <<~CONTENT
+    #!/bin/sh
+    exec vlogger -t dbus-$(id -u) -p daemon
+  CONTENT
+
+  owner node.user
+  mode "755"
 end
 
 directory "#{node.home_dir}/.config/service/turnstile-ready" do
