@@ -6,6 +6,8 @@ node.reverse_merge!(
   waybar_modules_right: ["network", "battery", "tray"],
 
   mconfig: <<~MCONFIG,
+
+  exec_always pipewire
     output eDP-1 pos 0 0 scale 1 bg ~/pics/fern.jpg fill
   MCONFIG
 
