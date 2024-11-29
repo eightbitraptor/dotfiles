@@ -14,10 +14,10 @@ unless node.hostname == "spin"
   end
 end
 
-%w{ 
+%w{
   mg
   tig
-  htop 
+  htop
   ruby
 }.each do |pkg|
   package pkg do

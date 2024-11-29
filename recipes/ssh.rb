@@ -1,8 +1,10 @@
-packages = %w{
-  openssh
-}
+packages = if node.distro == "ubuntu"
+  %w{openssh-server}
+else
+  %w{openssh}
+end
 
-if node.distro != "void"
+if node.distro == "fedora"
   packages << "openssh-clients"
 end
 
