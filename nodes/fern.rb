@@ -25,9 +25,28 @@ node.reverse_merge!(
   sway_mod: "Mod1",
 
   greetd_environments: <<~ENVS,
-    sway
+    sway-session
   ENVS
 )
+
+file "/usr/local/bin/sway-session" do
+  owner "root"
+  mode "0755"
+  content <<~CONTENT
+    #!/bin/sh
+    export XDG_SESSION_TYPE=wayland
+    export XDG_SESSION_DESKTOP=sway
+    export XDG_CURRENT_DESKTOP=sway
+
+    # Wayland stuff
+    export QT_QPA_PLATFORM=wayland
+    export SDL_VIDEODRIVER=wayland
+    export _JAVA_AWT_WM_NONREPARENTING=1
+
+    dbus-update-activation-environment --all
+    exec sway "$@"
+  CONTENT
+end
 
 %w{
   intel-media-driver
