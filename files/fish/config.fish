@@ -1,4 +1,4 @@
-if test -f ~/.cache/wal/sequences
+if status --is-interactive && test -f ~/.cache/wal/sequences
   cat ~/.cache/wal/sequences
 end
 
