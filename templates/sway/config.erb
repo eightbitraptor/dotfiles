@@ -3,7 +3,7 @@
 include /etc/sway/config.d/*
 
 exec --no-startup-id wal -i /usr/share/backgrounds/<%= @hostname %>.jpg
-exec --no-startup-id dbus-update-actication-environment --all
+exec --no-startup-id dbus-update-activation-environment --all
 
 set $mod <%= @sway_mod %>
 floating_modifier $mod
