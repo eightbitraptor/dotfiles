@@ -29,16 +29,20 @@ input type:touchpad {
 
 <%= @monitor_config %>
 
-# Monitor off at 5 mins
-# screen locked at 10 mins.
-# if the screen is locked and the screen wakes, turn it off again after 15 secs
-# of idle.
-# lock the screen when suspending
+output * adaptive_sync on
+
+set $swaylock 'swaylock --daemonize'
+set $swaydpmsoff 'swaymsg "output * dpms off"'
+set $swaydpmson  'swaymsg "output * dpms on, output * enable"'
+
 exec swayidle -w \
-    timeout 300 'swaymsg "output * dpms off"' \
-    timeout 600 'swaylock' \
-    resume 'swaymsg "output * dpms on"' \
-    before-sleep 'swaylock'
+  idlehint 300              \
+   timeout 300 $swaylock    \
+   timeout 300 $swaydpmsoff resume $swaydpmson \
+  before-sleep $swaylock    \
+          lock $swaylock    \
+  after-resume $swaydpmson  \
+        unlock $swaydpmson
 
 <%= @swayfx_config %>
 
