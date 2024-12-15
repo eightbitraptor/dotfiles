@@ -8,7 +8,7 @@ node.reverse_merge!(
   mconfig: <<~MCONFIG,
 
   exec_always pipewire
-    output eDP-1 pos 0 0 scale 1 bg ~/pics/fern.jpg fill
+    output eDP-1 pos 0 0 scale 1 bg /usr/share/backgrounds/fern.jpg fill
   MCONFIG
 
   swayfx_config: <<~SCONFIG,
@@ -19,6 +19,7 @@ node.reverse_merge!(
     shadows enable
     shadow_blur_radius 50
     shadow_offset 0 0
+    corner_radius 6
     default_dim_inactive 0.25
   SCONFIG
 
