@@ -9,3 +9,5 @@ set history filename ~/.gdb_history
 set auto-load safe-path /
 
 set confirm off
+
+set debuginfod enabled on
