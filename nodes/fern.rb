@@ -65,7 +65,6 @@ void_service "tlp" do
   action [:enable, :start]
 end
 
-include_local_recipe "greetd"
 include_local_recipe "sway"
 
 include_local_recipe "fish"
