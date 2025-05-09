@@ -52,10 +52,12 @@ end
 
 directory "#{node.home_dir}/.config/service" do
   owner node.user
+  group node.user
 end
 
 directory "#{node.home_dir}/.config/service/turnstile-ready" do
   owner node.user
+  group node.user
 end
 
 include_local_recipe "pipewire"
