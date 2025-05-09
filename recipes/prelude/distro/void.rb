@@ -35,10 +35,6 @@ group_add "bluetooth"
 group_add "storage"
 group_add "network"
 
-link "/etc/greetd/config.toml" do
-  to "#{FILES_DIR}/greetd/config.toml"
-  force true
-end
 
 %w{
   seatd
