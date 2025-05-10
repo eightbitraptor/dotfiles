@@ -49,20 +49,22 @@ file "/usr/local/bin/sway-session" do
   CONTENT
 end
 
-%w{
+if node.distro == "void"
+  %w{
   intel-media-driver
   mesa-dri
   vulkan-loader
   mesa-vulkan-intel
   tlp
-}.each do |pname|
-  package pname do
-    action :install
+  }.each do |pname|
+    package pname do
+      action :install
+    end
   end
-end
 
-void_service "tlp" do
-  action [:enable, :start]
+  void_service "tlp" do
+    action [:enable, :start]
+  end
 end
 
 include_local_recipe "sway"
