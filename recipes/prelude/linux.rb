@@ -19,6 +19,7 @@ end
   tig
   htop
   ruby
+  pipx
 }.each do |pkg|
   package pkg do
     action :install
