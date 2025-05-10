@@ -17,5 +17,5 @@ end
 
 # TODO: wtf Debian stopped allowing pip install...
 unless File.exist?("#{node.home_dir}/.local/bin/compdb") || ["ubuntu", "void"].include?(node.distro)
-  execute "pip install --user git+https://github.com/Sarcasm/compdb.git#egg=compdb"
+  execute "pipx install --user git+https://github.com/Sarcasm/compdb.git#egg=compdb"
 end
