@@ -6,6 +6,8 @@ when "fedora"
   include_local_recipe "prelude/distro/fedora"
 when "void"
   include_local_recipe "prelude/distro/void"
+when "arch"
+  raise "ARCHLINUX"
 end
 
 unless node.hostname == "spin"

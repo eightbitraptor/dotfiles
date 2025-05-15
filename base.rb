@@ -20,10 +20,20 @@ rescue KeyError
   $stderr.puts "EBR_GIT_HOST not defined, Please configure this to be the internal Git server address"
 end
 
+def get_hostname
+  run_command("which hostname")
+end
+
+$hostname = begin
+  run_command("hostname").stdout.split('.').first.downcase.strip
+rescue
+  run_command("hostnamectl hostname")
+end.stdout.split('.').first.downcase.strip
+
 node.reverse_merge!(
   os: $os,
   distro: $distro,
-  hostname: run_command('hostname').stdout.split('.').first.downcase.strip,
+  hostname: $hostname,
   user: ENV['SUDO_USER'] || ENV['USER'],
   home_dir: $home_dir,
   git_host: $git_host,
