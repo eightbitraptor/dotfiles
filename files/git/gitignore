@@ -1,4 +1,4 @@
-.solargraph.yml
+gsolargraph.yml
 .dumbjump
 .bundle
 .DS_Store
@@ -13,7 +13,6 @@ lib/mjit
 
 TAGS
 
-test.rb
 test_code.rb
 
 cruby.txt
@@ -22,3 +21,11 @@ prism.txt
 target
 build
 install
+
+target
+
+CLAUDE.md
+.claude
+.cursor
+
+.ruby-version

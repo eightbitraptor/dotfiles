@@ -1,27 +1,91 @@
+"let $PATH = system("printenv PATH")
+"let $PATH = substitute($PATH, "\<C-J>$", "", "")
+
+call plug#begin('~/.vim/plugged')
+
+" Make buffers work better
+Plug 'vim-scripts/bufkill.vim'
+Plug 'vim-scripts/scratch.vim'
+
+" Git
+Plug 'tpope/vim-fugitive'
+
+" Project navigation
+Plug 'junegunn/fzf'
+Plug 'junegunn/fzf.vim'
+Plug 'lambdalisue/fern.vim'
+Plug 'lambdalisue/vim-fern-renderer-nerdfont'
+
+" Code utils
+Plug 'tpope/vim-surround'
+Plug 'tpope/vim-commentary'
+Plug 'tpope/vim-unimpaired'
+Plug 'godlygeek/tabular'
+Plug 'preservim/tagbar'
+Plug 'tpope/vim-vinegar'
+Plug 'bfrg/vim-cpp-modern'
+Plug 'vim-scripts/VimCompletesMe'
+Plug 'ntpeters/vim-better-whitespace'
+
+" Ruby/Rails
+Plug 'vim-ruby/vim-ruby'
+Plug 'tpope/vim-rbenv'
+Plug 'tpope/vim-rails'
+
+" Rust
+Plug 'wting/rust.vim'
+Plug 'racer-rust/vim-racer'
+
+" Theme & Appearance
+Plug 'lambdalisue/nerdfont.vim'
+Plug 'vim-airline/vim-airline'
+let g:airline_extensions = ['branch', 'fzf']
+
+call plug#end()
+
 filetype on
 filetype plugin on
 filetype indent on
+set nocompatible
+let skip_defaults_vim=1
+set viminfo=
+set synmaxcol=300
+set ttyfast
+set lazyredraw
 
 let &t_8f = "\<Esc>[38;2;%lu;%lu;%lum"
 let &t_8b = "\<Esc>[48;2;%lu;%lu;%lum"
 
-set termguicolors
-set background=dark
+" Apple Terminal doesn't support truecolour, so setting termguicolors messes
+" it up big style
+if !$TERM_PROGRAM == "Apple_Terminal"
+  set termguicolors
+endif
 
-set clipboard=unnamed
+" Fedora sets cscopetag by default, which changes the behaviour of Ctrl-] to
+" always show a tselect list when there is more than one result, whereas I
+" want the default behaviour of - jump to the first result, if it looks wrong
+" I can tselect myself.
+set nocscopetag
+
+syntax on
+
+if !exists('$TMUX')
+    set clipboard=unnamed
+endif
 
 set autoindent " Auto-indent
 set expandtab " Expand tabs to spaces
 set tabstop=2
 set shiftwidth=2
-set number " Line numbers on
+"set number " Line numbers on
 set backspace=indent,eol,start " Backspace over everything
 set isk+=$,@,%,# " these aren't word dividers
 set showcmd " show current command in status bar
 set hidden " Allow hidden buffers
 set laststatus=2
 set ttimeoutlen=0 timeoutlen=1000
-set relativenumber
+"set relativenumber
 
 set mouse=a
 
@@ -87,11 +151,15 @@ augroup PythonShenanigans
     \ nnoremap ;t :w\|:!nosetests %<cr>
 augroup END
 
+let g:cpp_attributes_highlight = 1
+let g:cpp_member_highlight = 1
+
 augroup CShenanigans
   au!
   autocmd BufRead,BufNewFile *.c,*.h
         \ set filetype=c |
         \ set tabstop=8 shiftwidth=4 smarttab expandtab |
+  autocmd BufRead *.c   setlocal cinoptions=l1
   autocmd BufRead */ruby/*.c   setlocal cinoptions=:2,=2,l1
 augroup END
 
@@ -126,7 +194,7 @@ function! DoneTagging(channel)
 endfunction
 
 function! Taggit()
-    let job = job_start("ctags --tag-relative=yes --extras=+f -Rf.git/tags --languages=-javascript,sql,TypeScript --exclude=.ext --exclude=include/ruby-\* --exclude=rb_mjit_header.h .", { 'close_cb': 'DoneTagging'})
+    let job = job_start("ctags --tag-relative=yes --extras=+f -Rf.git/tags --languages=-javascript,sql,TypeScript --exclude=.ext --exclude=rb_mjit_header.h .", { 'close_cb': 'DoneTagging'})
 endfunction
 
 " Tags
@@ -139,6 +207,7 @@ nnoremap <leader>l :Lines<CR>
 nnoremap <leader>T :Tags<CR>
 nnoremap <leader>t :BTags<CR>
 
+let g:fern#renderer = "nerdfont"
 nnoremap <leader>n :Fern . -drawer -toggle -reveal=%<CR>
 nnoremap <leader>s :TagbarToggle<CR>
 

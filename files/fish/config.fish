@@ -28,7 +28,7 @@ if test -f /opt/dev/dev.fish
   source /opt/dev/dev.fish
 end
 
-direnv hook fish | source
-chruby 3.4.3
+chruby 3.4.4
 
 #status --is-interactive; and ~/.rbenv/bin/rbenv init - fish | source
+alias claude="/Users/mattvh/.claude/local/claude"

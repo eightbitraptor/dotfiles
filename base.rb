@@ -25,7 +25,7 @@ def get_hostname
 end
 
 $hostname = begin
-  run_command("hostname").stdout.split('.').first.downcase.strip
+  run_command("hostname")
 rescue
   run_command("hostnamectl hostname")
 end.stdout.split('.').first.downcase.strip

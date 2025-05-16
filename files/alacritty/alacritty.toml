@@ -50,7 +50,7 @@ blinking = "Always"
 TERM = "xterm-256color"
 
 [font]
-size = 12
+size = 16
 
 [font.normal]
 family = "Jetbrains Mono"
@@ -109,7 +109,7 @@ multiplier = 3
 
 [terminal.shell]
 args = ["--login"]
-program = "/usr/bin/fish"
+program = "/opt/homebrew/bin/fish"
 
 [window]
 decorations = "full"
@@ -117,6 +117,8 @@ decorations_theme_variant = "Dark"
 dynamic_padding = true
 padding = { x = 4, y = 4 }
 opacity = 0.90
+opacity = 0.95
+blur = true
 title = "Alacritty"
 
 

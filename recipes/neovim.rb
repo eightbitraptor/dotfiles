@@ -9,7 +9,6 @@ packages.each do |pname|
   end
 end
 
-dotfile ".config/nvim/init.vim" do
-  source "neovim/init.vim"
+dotfile ".config/nvim/init.lua" do
+  source "neovim/init.lua"
 end
-

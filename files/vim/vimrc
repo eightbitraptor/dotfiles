@@ -14,6 +14,7 @@ Plug 'tpope/vim-fugitive'
 Plug 'junegunn/fzf'
 Plug 'junegunn/fzf.vim'
 Plug 'lambdalisue/fern.vim'
+Plug 'lambdalisue/vim-fern-renderer-nerdfont'
 
 " Code utils
 Plug 'tpope/vim-surround'
@@ -36,6 +37,7 @@ Plug 'wting/rust.vim'
 Plug 'racer-rust/vim-racer'
 
 " Theme & Appearance
+Plug 'lambdalisue/nerdfont.vim'
 Plug 'vim-airline/vim-airline'
 let g:airline_extensions = ['branch', 'fzf']
 
@@ -76,14 +78,14 @@ set autoindent " Auto-indent
 set expandtab " Expand tabs to spaces
 set tabstop=2
 set shiftwidth=2
-set number " Line numbers on
+"set number " Line numbers on
 set backspace=indent,eol,start " Backspace over everything
 set isk+=$,@,%,# " these aren't word dividers
 set showcmd " show current command in status bar
 set hidden " Allow hidden buffers
 set laststatus=2
 set ttimeoutlen=0 timeoutlen=1000
-set relativenumber
+"set relativenumber
 
 set mouse=a
 
@@ -205,6 +207,7 @@ nnoremap <leader>l :Lines<CR>
 nnoremap <leader>T :Tags<CR>
 nnoremap <leader>t :BTags<CR>
 
+let g:fern#renderer = "nerdfont"
 nnoremap <leader>n :Fern . -drawer -toggle -reveal=%<CR>
 nnoremap <leader>s :TagbarToggle<CR>
 
