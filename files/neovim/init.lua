@@ -14,7 +14,11 @@ end
 bootstrap_pckr()
 
 require('pckr').add{
-  -- Make buffers work better
+  -- Appearance
+  'uZer/pywal16.nvim';
+  'nvim-lualine/lualine.nvim';
+
+  -- Buffer shenanigans
   'vim-scripts/bufkill.vim';
   'vim-scripts/scratch.vim';
 
@@ -22,10 +26,10 @@ require('pckr').add{
   'tpope/vim-fugitive';
 
   -- Project navigation
-  { 
-    'nvim-telescope/telescope.nvim', 
-    requires = 'nvim-lua/plenary.nvim' 
-  }; 
+  {
+    'nvim-telescope/telescope.nvim',
+    requires = 'nvim-lua/plenary.nvim'
+  };
   'junegunn/fzf';
   'junegunn/fzf.vim';
   'lambdalisue/fern.vim';
@@ -39,14 +43,19 @@ require('pckr').add{
   'preservim/tagbar';
   'tpope/vim-vinegar';
   'bfrg/vim-cpp-modern';
+  {
+    'nvim-treesitter/nvim-treesitter',
+    run = { ':TSUpdate' }
+  };
 
+  -- Terminal
+   'numToStr/FTerm.nvim';
 
-
-  { 
+  -- AI
+  {
     'yetone/avante.nvim',
     branch = 'main',
     requires = {
-      'nvim-treesitter/nvim-treesitter',
       'stevearc/dressing.nvim',
       'nvim-lua/plenary.nvim',
       'MunifTanjim/nui.nvim',
@@ -62,6 +71,70 @@ require('pckr').add{
     end
   }
 }
+
+local lualine = require('lualine')
+local diagnostics = {
+	"diagnostics",
+	sources = { "nvim_diagnostic" },
+	sections = { "error", "warn" },
+	symbols = { error = " ", warn = " " },
+	colored = true,
+	update_in_insert = false,
+	always_visible = true,
+	cond = function()
+		return vim.bo.filetype ~= "markdown"
+	end,
+}
+
+local diff = {
+	"diff",
+	colored = true,
+	symbols = { added = " ", modified = " ", removed = " " },
+}
+
+local mode = {
+	"mode",
+	fmt = function(str)
+		return "-- " .. str .. " --"
+	end,
+}
+
+local branch = {
+	"branch",
+	icon = "",
+}
+
+local progress = function()
+	local current_line = vim.fn.line(".")
+	local total_lines = vim.fn.line("$")
+	local chars = { "", "", "" } --adding more chars will still work
+	local line_ratio = current_line / total_lines
+	local index = math.ceil(line_ratio * #chars)
+	return chars[index] .. " " .. math.floor(line_ratio * 100) .. "%%"
+end
+
+lualine.setup({
+options = {
+	icons_enabled = true,
+	theme = "auto",
+	component_separators = { left = "", right = "" },
+	section_separators = { left = "", right = "" },
+	disabled_filetypes = { "alpha", "dashboard" },
+	always_divide_middle = true,
+	},
+
+sections = {
+	lualine_a = { branch },
+	lualine_b = { mode },
+	lualine_c = { diagnostics },
+	lualine_x = { diff, "fileformat", "filetype" },
+	lualine_y = { "location" },
+	lualine_z = { progress },
+	},
+})
+
+require("lualine").setup()
+require("pywal16").setup()
 
 local map = vim.keymap.set
 
