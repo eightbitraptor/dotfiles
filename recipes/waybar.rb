@@ -1,5 +1,5 @@
 pname = {
-  ubuntu: "waybar", fedora: "waybar", void: "Waybar"
+  ubuntu: "waybar", fedora: "waybar", void: "Waybar", arch: "waybar"
 }
 
 package pname[node.distro.intern] do

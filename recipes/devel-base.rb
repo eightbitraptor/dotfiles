@@ -5,7 +5,6 @@ tools = %w{
   bison
   gcc
   gdb
-  rr
   make
   bear
   lldb
@@ -17,13 +16,20 @@ tools = %w{
 case node.distro
 when "fedora"
   tools << "clang-tools-extra"
+  tools << "rr"
 when "ubuntu"
   tools << "clang-tools"
+  tools << "rr"
 when "void"
   tools << "clang-tools-extra"
+  tools << "rr"
 
   # What the Fuck, Voidlinux
   tools[tools.index("bear")] = "Bear"
+end
+
+if node.distro == "arch"
+  aur_package_notify("rr")
 end
 
 tools.each do |package|

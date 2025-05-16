@@ -1,12 +1,12 @@
 include_local_recipe "devel-base"
 
 ruby_deps = [
-  {fedora: "zlib-ng-compat-devel", ubuntu: "zlib1g-dev",      void: "zlib-devel" },
-  {fedora: "libffi-devel",         ubuntu: "libffi-dev",      void: "libffi-devel" },
-  {fedora: "readline-devel",       ubuntu: "libreadline-dev", void: "readline-devel" },
-  {fedora: "gdbm-devel",           ubuntu: "libgdbm-dev",     void: "gdbm-devel" },
-  {fedora: "openssl-devel",        ubuntu: "libssl-dev",      void: "openssl-devel"},
-  {fedora: "libyaml-devel",        ubuntu: "libyaml-dev",     void: "libyaml-devel" },
+  {fedora: "zlib-ng-compat-devel", ubuntu: "zlib1g-dev",      void: "zlib-devel", arch: "zlib" },
+  {fedora: "libffi-devel",         ubuntu: "libffi-dev",      void: "libffi-devel", arch: "libffi" },
+  {fedora: "readline-devel",       ubuntu: "libreadline-dev", void: "readline-devel", arch: "readline" },
+  {fedora: "gdbm-devel",           ubuntu: "libgdbm-dev",     void: "gdbm-devel", arch: "gdbm" },
+  {fedora: "openssl-devel",        ubuntu: "libssl-dev",      void: "openssl-devel", arch: "openssl" },
+  {fedora: "libyaml-devel",        ubuntu: "libyaml-dev",     void: "libyaml-devel", arch: "libyaml" },
 ]
 
 ruby_deps.each do |package_pairs|
@@ -15,7 +15,6 @@ ruby_deps.each do |package_pairs|
   end
 end
 
-# TODO: wtf Debian stopped allowing pip install...
-unless File.exist?("#{node.home_dir}/.local/bin/compdb") || ["ubuntu", "void"].include?(node.distro)
-  execute "pipx install --user git+https://github.com/Sarcasm/compdb.git#egg=compdb"
+pip "git+https://github.com/Sarcasm/compdb.git#egg=compdb" do
+  use_pipx true  
 end

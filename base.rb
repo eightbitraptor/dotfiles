@@ -181,5 +181,14 @@ define :group_add, user: node.user do
   end
 end
 
+define :aur_package_notify do
+  pkg_name = params[:name]
+  execute "Notify to install AUR package: #{pkg_name} if missing" do
+    command "echo 'AUR_INFO: #{pkg_name} is not installed. Please install it manually using: yay -S #{pkg_name} then re-run.' && exit 1"
+    user node.user
+    not_if "pacman -Q #{pkg_name}"
+  end
+end
+
 include_recipe "recipes/prelude/#{node.os}.rb"
 include_recipe "#{NODES_DIR}/#{node[:hostname]}.rb"

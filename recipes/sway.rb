@@ -3,30 +3,56 @@ include_local_recipe "fuzzel"
 include_local_recipe "waybar"
 
 packages = %w{
-  light
   swaylock
   grim
   slurp
 }
 
+# Before we check anything else, if we're on arch, we need to install SwayFX
+# from the AUR
+if node.distro == "arch"
+  aur_package_notify "scenefx-git"
+  aur_package_notify "swayfx"
+  aur_package_notify "light"
+end
+
 case node.distro
 when "fedora"
+  packages << "light"
   packages << "swayfx"
   packages << "fontawesome-fonts-all"
   packages << "azote"
 when "ubuntu"
+  packages << "light"
   packages << "sway"
   packages << "node-fortawesome-fontawesome-free"
 when "void"
+  packages << "light"
   packages << "swayidle"
   packages << "swayfx"
   packages << "font-awesome"
   packages << "python3-pipx"
+when "arch"
+  packages << "swayidle"
+  packages << "swaylock"
+  packages << "swaybg"
+  packages << "azote"
+  packages << "seatd"
 end
 
 packages.each do |pkg_name|
   package pkg_name do
     action :install
+  end
+end
+
+if node.distro == "arch"
+  group_add "seat" do
+    user node.user
+  end
+
+  service "seatd" do
+    action [:enable, :start]
   end
 end
 

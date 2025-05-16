@@ -1,6 +1,6 @@
 packages = [
-  { fedora: "wget2-wget", ubuntu: "wget", void: "wget" },
-  { fedora: "make", ubuntu: "make", void: "make" },
+  { fedora: "wget2-wget", ubuntu: "wget", void: "wget", arch: "wget" },
+  { fedora: "make", ubuntu: "make", void: "make", arch: "make" },
 ]
 
 packages.each do |package_pairs|

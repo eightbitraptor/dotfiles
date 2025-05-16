@@ -7,22 +7,29 @@ when "fedora"
 when "void"
   include_local_recipe "prelude/distro/void"
 when "arch"
-  raise "ARCHLINUX"
+  include_local_recipe "prelude/distro/arch"
 end
 
 unless node.hostname == "spin"
   personal_git "scripts" do
-    destination "#{node.home_dir}/.scripts"
+    destination "#{node.home_dir}/scripts"
   end
 end
 
-%w{
+packages = %w{
   mg
   tig
   htop
   ruby
-  pipx
-}.each do |pkg|
+}
+
+if node.distro == "arch"
+  packages << "python-pipx"
+else
+  packages << "pipx"
+end
+
+packages.each do |pkg|
   package pkg do
     action :install
   end
