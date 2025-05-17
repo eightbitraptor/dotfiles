@@ -109,7 +109,7 @@ multiplier = 3
 
 [terminal.shell]
 args = ["--login"]
-program = "/opt/homebrew/bin/fish"
+program = "/usr/local/bin/fish"
 
 [window]
 decorations = "full"
