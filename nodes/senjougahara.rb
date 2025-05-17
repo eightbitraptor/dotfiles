@@ -6,8 +6,8 @@ node.reverse_merge!(
   waybar_modules_right: ["pulseaudio", "tray"],
 
   mconfig: <<~MCONFIG,
-    output 'HDMI-A-1' scale 1.0 pos 2560 0 bg /usr/share/backgrounds/senjougahara.jpg fill
-    output 'HDMI-A-2' scale 1.5 pos 0 0 bg /usr/share/backgrounds/senjougahara.jpg fill
+    output 'HDMI-A-1' scale 1.5 pos 0 0 bg /usr/share/backgrounds/senjougahara-landscape.jpg fill
+    output 'HDMI-A-2' scale 1.0 pos 2560 -640 bg /usr/share/backgrounds/senjougahara-portrait.jpg fill transform 90
   MCONFIG
 
   swayfx_config: <<~SCONFIG,
