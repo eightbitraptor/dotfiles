@@ -24,11 +24,11 @@ if test -f /opt/homebrew/bin/brew
   /opt/homebrew/bin/brew shellenv | source
 end
 
+chruby 3.4.4
+
 if test -f /opt/dev/dev.fish
   source /opt/dev/dev.fish
 end
-
-chruby 3.4.4
 
 #status --is-interactive; and ~/.rbenv/bin/rbenv init - fish | source
 alias claude="/Users/mattvh/.claude/local/claude"
