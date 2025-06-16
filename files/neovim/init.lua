@@ -33,7 +33,7 @@ require('pckr').add{
     'junegunn/fzf';
     'junegunn/fzf.vim';
     'lambdalisue/fern.vim';
-    'lambdaalisue/vim-fern-renderer-nerdfont';
+    'lambdalisue/vim-fern-renderer-nerdfont';
 
     -- Code utils;
     'tpope/vim-surround';
