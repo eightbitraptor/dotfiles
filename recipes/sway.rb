@@ -11,7 +11,7 @@ packages = %w{
 # Before we check anything else, if we're on arch, we need to install SwayFX
 # from the AUR
 if node.distro == "arch"
-  aur_package_notify "scenefx-git"
+  #aur_package_notify "scenefx-git"
   aur_package_notify "swayfx"
   aur_package_notify "light"
 end
