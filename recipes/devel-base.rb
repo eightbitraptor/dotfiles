@@ -28,8 +28,10 @@ when "void"
   tools[tools.index("bear")] = "Bear"
 end
 
+# Install rr (Record and Replay Framework) from AUR on Arch Linux
 if node.distro == "arch"
-  aur_package_notify("rr")
+  include_recipe File.expand_path("../recipes/plugins/aur_package.rb", __dir__)
+  aur_package "rr"
 end
 
 tools.each do |package|

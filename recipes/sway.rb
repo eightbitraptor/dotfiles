@@ -2,18 +2,22 @@ include_local_recipe "alacritty"
 include_local_recipe "fuzzel"
 include_local_recipe "waybar"
 
+# Include AUR package plugin for Arch Linux
+if node.distro == "arch"
+  include_recipe File.expand_path("../recipes/plugins/aur_package.rb", __dir__)
+end
+
 packages = %w{
   swaylock
   grim
   slurp
 }
 
-# Before we check anything else, if we're on arch, we need to install SwayFX
-# from the AUR
+# Install AUR packages for Arch Linux
+# These packages provide enhanced Sway functionality and backlight control
 if node.distro == "arch"
-  #aur_package_notify "scenefx-git"
-  aur_package_notify "swayfx"
-  aur_package_notify "light"
+  aur_package "swayfx"       # Sway with additional visual effects
+  aur_package "light"        # Backlight control utility
 end
 
 case node.distro
