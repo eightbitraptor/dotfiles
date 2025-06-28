@@ -1,0 +1,241 @@
+#!/usr/bin/env ruby
+# Mitamae Test Artifact Collection Tool
+
+require_relative '../lib/test_framework'
+require_relative '../environments/environment_manager'
+
+module MitamaeTest
+  class ArtifactCollectionCLI
+    include Logging
+    
+    def initialize
+      @env_manager = Environments::EnvironmentManager.new
+    end
+    
+    def run(args)
+      case args[0]
+      when 'collect'
+        collect_command(args[1..-1])
+      when 'list'
+        list_command(args[1..-1])
+      when 'cleanup'
+        cleanup_command(args[1..-1])
+      when 'report'
+        report_command(args[1..-1])
+      when 'help'
+        show_help
+      else
+        show_help
+        exit 1
+      end
+    end
+    
+    private
+    
+    def collect_command(args)
+      environment_name = args[0]
+      
+      unless environment_name
+        puts "Error: Environment name required"
+        puts "Usage: collect-artifacts collect <environment_name> [options]"
+        exit 1
+      end
+      
+      env_context = @env_manager.get_environment(environment_name)
+      unless env_context
+        puts "Error: Environment '#{environment_name}' not found"
+        puts "Active environments: #{@env_manager.list_environments.join(', ')}"
+        exit 1
+      end
+      
+      puts "Collecting artifacts for environment: #{environment_name}"
+      
+      # Parse options
+      config = {}
+      config[:create_archive] = args.include?('--archive')
+      config[:create_browsable_index] = args.include?('--index')
+      
+      if args.include?('--failure')
+        test_failure = {
+          test_name: "manual_collection",
+          error_message: "Manual failure artifact collection",
+          failed: true
+        }
+        
+        result = env_context.collect_failure_artifacts(test_failure)
+      else
+        result = env_context.collect_artifacts(nil, config)
+      end
+      
+      if result[:success]
+        puts "✅ Artifact collection completed successfully"
+        puts "📁 Location: #{File.dirname(result[:artifacts]&.values&.first || 'unknown')}"
+        puts "📊 Duration: #{result[:duration]&.round(2)}s"
+        puts "💾 Total size: #{format_size(result[:total_size])}"
+        puts "📋 Artifact types: #{result[:artifacts]&.keys&.join(', ')}"
+        
+        if result[:archive_path]
+          puts "📦 Archive: #{result[:archive_path]}"
+        end
+        
+        if result[:browsable_index]
+          puts "🌐 Browse: file://#{result[:browsable_index]}"
+        end
+      else
+        puts "❌ Artifact collection failed"
+        result[:errors]&.each { |error| puts "   Error: #{error}" }
+        exit 1
+      end
+    end
+    
+    def list_command(args)
+      environment_name = args[0]
+      limit = (args[1] || 10).to_i
+      
+      if environment_name
+        history = @env_manager.get_artifact_history(environment_name, limit)
+        
+        if history.empty?
+          puts "No artifact collections found for environment: #{environment_name}"
+          return
+        end
+        
+        puts "Artifact History for #{environment_name}:"
+        puts "=" * 60
+        
+        history.each_with_index do |collection, index|
+          status_icon = collection[:success] ? "✅" : "❌"
+          puts "#{index + 1}. #{status_icon} #{collection[:timestamp]}"
+          puts "   📁 #{collection[:collection_dir]}"
+          puts "   📊 Types: #{collection[:artifact_types].join(', ')}"
+          puts "   💾 Size: #{format_size(collection[:total_size])}"
+          puts "   ⏱️  Duration: #{collection[:duration]&.round(2)}s"
+          puts
+        end
+      else
+        # List all environments and their artifact summaries
+        environments = @env_manager.list_environments
+        
+        if environments.empty?
+          puts "No active environments found"
+          return
+        end
+        
+        puts "Artifact Summary for All Environments:"
+        puts "=" * 60
+        
+        environments.each do |env_name|
+          history = @env_manager.get_artifact_history(env_name, 5)
+          
+          puts "📦 #{env_name}"
+          puts "   Collections: #{history.size}"
+          
+          if history.any?
+            latest = history.first
+            puts "   Latest: #{latest[:timestamp]} (#{latest[:success] ? 'Success' : 'Failed'})"
+            total_size = history.sum { |h| h[:total_size] || 0 }
+            puts "   Total size: #{format_size(total_size)}"
+          else
+            puts "   No collections yet"
+          end
+          
+          puts
+        end
+      end
+    end
+    
+    def cleanup_command(args)
+      environment_name = args[0]
+      max_age_days = (args[1] || 7).to_i
+      
+      puts "Cleaning up artifacts older than #{max_age_days} days..."
+      
+      result = @env_manager.cleanup_old_artifacts(environment_name, max_age_days)
+      
+      puts "✅ Cleanup completed"
+      puts "🗑️  Collections removed: #{result[:collections_removed]}"
+      puts "💾 Space freed: #{format_size(result[:size_freed])}"
+    end
+    
+    def report_command(args)
+      environment_name = args[0]
+      format = (args[1] || 'html').to_sym
+      
+      puts "Generating artifact report (#{format})..."
+      
+      report_path = @env_manager.create_artifact_report(environment_name, format)
+      
+      puts "✅ Report generated: #{report_path}"
+      
+      if format == :html
+        puts "🌐 Open in browser: file://#{report_path}"
+      end
+    end
+    
+    def show_help
+      puts <<~HELP
+        Mitamae Test Artifact Collection Tool
+        
+        Usage:
+          collect-artifacts <command> [options]
+        
+        Commands:
+          collect <env_name> [--archive] [--index] [--failure]
+            Collect artifacts from the specified environment
+            --archive: Create compressed archive
+            --index: Create browsable HTML index
+            --failure: Collect full failure artifacts
+          
+          list [env_name] [limit]
+            List artifact collections
+            env_name: Show history for specific environment (optional)
+            limit: Maximum number of collections to show (default: 10)
+          
+          cleanup [env_name] [max_age_days]
+            Clean up old artifact collections
+            env_name: Clean specific environment (optional, cleans all if not specified)
+            max_age_days: Maximum age in days (default: 7)
+          
+          report [env_name] [format]
+            Generate artifact report
+            env_name: Generate for specific environment (optional, all if not specified)
+            format: html, json, or yaml (default: html)
+          
+          help
+            Show this help message
+        
+        Examples:
+          collect-artifacts collect test-env --archive --index
+          collect-artifacts list test-env 20
+          collect-artifacts cleanup 30
+          collect-artifacts report test-env html
+      HELP
+    end
+    
+    def format_size(bytes)
+      return "0 B" if bytes.nil? || bytes == 0
+      
+      units = %w[B KB MB GB TB]
+      size = bytes.to_f
+      unit_index = 0
+      
+      while size >= 1024.0 && unit_index < units.length - 1
+        size /= 1024.0
+        unit_index += 1
+      end
+      
+      "#{size.round(2)} #{units[unit_index]}"
+    end
+  end
+end
+
+# Run the CLI if this script is executed directly
+if __FILE__ == $0
+  begin
+    cli = MitamaeTest::ArtifactCollectionCLI.new
+    cli.run(ARGV)
+  rescue => e
+    puts "Error: #{e.message}"
+    exit 1
+  end
+end

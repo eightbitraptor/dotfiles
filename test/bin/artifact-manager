@@ -1,0 +1,930 @@
+#!/usr/bin/env ruby
+# Mitamae Test Artifact Management Tool
+
+require_relative '../lib/test_framework'
+require_relative '../artifact_repository'
+require_relative '../artifact_comparator'
+require_relative '../artifact_browser'
+
+module MitamaeTest
+  class ArtifactManagerCLI
+    include Logging
+    
+    def initialize
+      @repository_path = ENV['MITAMAE_ARTIFACT_REPO'] || File.join(Dir.home, '.mitamae', 'artifacts')
+      @repository = ArtifactRepository.new(@repository_path)
+      @comparator = ArtifactComparator.new(@repository)
+      @browser = nil
+    end
+    
+    def run(args)
+      case args[0]
+      when 'init'
+        init_command(args[1..-1])
+      when 'import'
+        import_command(args[1..-1])
+      when 'export'
+        export_command(args[1..-1])
+      when 'search'
+        search_command(args[1..-1])
+      when 'list'
+        list_command(args[1..-1])
+      when 'show'
+        show_command(args[1..-1])
+      when 'compare'
+        compare_command(args[1..-1])
+      when 'tag'
+        tag_command(args[1..-1])
+      when 'cleanup'
+        cleanup_command(args[1..-1])
+      when 'stats'
+        stats_command(args[1..-1])
+      when 'backup'
+        backup_command(args[1..-1])
+      when 'restore'
+        restore_command(args[1..-1])
+      when 'browse'
+        browse_command(args[1..-1])
+      when 'view'
+        view_command(args[1..-1])
+      when 'trends'
+        trends_command(args[1..-1])
+      when 'help'
+        show_help
+      else
+        show_help
+        exit 1
+      end
+    rescue => e
+      puts "Error: #{e.message}"
+      puts e.backtrace.first(5).join("\n") if ENV['DEBUG']
+      exit 1
+    ensure
+      @repository&.close
+      @browser&.stop if @browser&.running?
+    end
+    
+    private
+    
+    def init_command(args)
+      puts "Initializing artifact repository at: #{@repository_path}"
+      
+      if File.exist?(@repository_path)
+        puts "Repository already exists."
+        return
+      end
+      
+      FileUtils.mkdir_p(@repository_path)
+      
+      # Test database connection
+      @repository.get_repository_statistics
+      
+      puts "✅ Artifact repository initialized successfully"
+      puts "📁 Repository path: #{@repository_path}"
+      puts ""
+      puts "Next steps:"
+      puts "  - Set MITAMAE_ARTIFACT_REPO environment variable to customize location"
+      puts "  - Use 'artifact-manager browse' to start the web interface"
+      puts "  - Use 'artifact-manager import' to import existing collections"
+    end
+    
+    def import_command(args)
+      import_path = args[0]
+      
+      unless import_path
+        puts "Error: Import path required"
+        puts "Usage: artifact-manager import <path_to_collection_or_archive>"
+        exit 1
+      end
+      
+      unless File.exist?(import_path)
+        puts "Error: Import path does not exist: #{import_path}"
+        exit 1
+      end
+      
+      puts "Importing collection from: #{import_path}"
+      
+      collection_id = @repository.import_collection(import_path)
+      collection = @repository.get_collection(collection_id)
+      
+      puts "✅ Collection imported successfully"
+      puts "📦 Collection ID: #{collection_id}"
+      puts "🏷️  Session ID: #{collection[:session_id]}"
+      puts "🏛️  Environment: #{collection[:environment_name]}"
+      puts "📊 Artifacts: #{collection[:artifact_count]}"
+      puts "💾 Size: #{format_size(collection[:total_size])}"
+    end
+    
+    def export_command(args)
+      collection_id = args[0]&.to_i
+      export_path = args[1] || '.'
+      format = (args[2] || 'tar_gz').to_sym
+      
+      unless collection_id
+        puts "Error: Collection ID required"
+        puts "Usage: artifact-manager export <collection_id> [export_path] [format]"
+        puts "Formats: tar_gz, zip, directory"
+        exit 1
+      end
+      
+      collection = @repository.get_collection(collection_id)
+      unless collection
+        puts "Error: Collection not found: #{collection_id}"
+        exit 1
+      end
+      
+      puts "Exporting collection #{collection_id} (#{collection[:session_id]})"
+      
+      archive_path = @repository.export_collection(collection_id, export_path, format)
+      
+      puts "✅ Collection exported successfully"
+      puts "📦 Archive: #{archive_path}"
+      puts "💾 Size: #{format_size(File.size(archive_path))}"
+    end
+    
+    def search_command(args)
+      query = args.join(' ')
+      
+      if query.empty?
+        puts "Error: Search query required"
+        puts "Usage: artifact-manager search <query> [--environment=ENV] [--type=TYPE]"
+        exit 1
+      end
+      
+      # Parse filters from arguments
+      filters = {}
+      args.each do |arg|
+        if arg.start_with?('--environment=')
+          filters[:environment] = arg.split('=', 2)[1]
+        elsif arg.start_with?('--type=')
+          filters[:artifact_type] = arg.split('=', 2)[1]
+        elsif arg.start_with?('--success=')
+          filters[:success] = arg.split('=', 2)[1] == 'true'
+        end
+      end
+      
+      # Remove filter args from query
+      clean_query = args.reject { |arg| arg.start_with?('--') }.join(' ')
+      
+      puts "Searching for: '#{clean_query}'"
+      puts "Filters: #{filters}" if filters.any?
+      puts ""
+      
+      results = @repository.search_artifacts(clean_query, filters)
+      
+      if results.empty?
+        puts "No artifacts found matching your search criteria."
+        return
+      end
+      
+      puts "Found #{results.size} artifacts:"
+      puts ""
+      
+      results.each_with_index do |result, index|
+        puts "#{index + 1}. #{result[:artifact_name]} (#{result[:artifact_type]})"
+        puts "   Collection: #{result[:session_id]}"
+        puts "   Environment: #{result[:environment_name]}"
+        puts "   Size: #{format_size(result[:file_size])}"
+        puts "   Created: #{format_time(result[:collection_created_at])}"
+        puts ""
+      end
+    end
+    
+    def list_command(args)
+      type = args[0] || 'collections'
+      limit = (args[1] || 20).to_i
+      
+      case type
+      when 'collections'
+        list_collections(limit)
+      when 'artifacts'
+        list_artifacts(args[2]&.to_i, limit)
+      when 'tags'
+        list_tags
+      when 'views'
+        list_views
+      else
+        puts "Error: Unknown list type: #{type}"
+        puts "Available types: collections, artifacts, tags, views"
+        exit 1
+      end
+    end
+    
+    def show_command(args)
+      type = args[0]
+      id = args[1]
+      
+      case type
+      when 'collection'
+        show_collection(id&.to_i)
+      when 'artifact'
+        show_artifact(id&.to_i)
+      when 'view'
+        show_view(id)
+      else
+        puts "Error: Unknown show type: #{type}"
+        puts "Available types: collection, artifact, view"
+        exit 1
+      end
+    end
+    
+    def compare_command(args)
+      collection_id1 = args[0]&.to_i
+      collection_id2 = args[1]&.to_i
+      output_format = args[2] || 'text'
+      
+      unless collection_id1 && collection_id2
+        puts "Error: Two collection IDs required"
+        puts "Usage: artifact-manager compare <collection_id1> <collection_id2> [format]"
+        puts "Formats: text, json, html"
+        exit 1
+      end
+      
+      if collection_id1 == collection_id2
+        puts "Error: Cannot compare collection with itself"
+        exit 1
+      end
+      
+      puts "Comparing collections #{collection_id1} and #{collection_id2}..."
+      
+      comparison = @repository.compare_collections(collection_id1, collection_id2)
+      
+      case output_format
+      when 'json'
+        puts JSON.pretty_generate(comparison)
+      when 'html'
+        html_output = generate_comparison_html(comparison)
+        output_file = "comparison-#{collection_id1}-#{collection_id2}-#{Time.now.to_i}.html"
+        File.write(output_file, html_output)
+        puts "HTML comparison saved to: #{output_file}"
+      else
+        display_comparison_text(comparison)
+      end
+    end
+    
+    def tag_command(args)
+      action = args[0]
+      collection_id = args[1]&.to_i
+      tags = args[2..-1]
+      
+      case action
+      when 'add', 'set'
+        unless collection_id && tags.any?
+          puts "Error: Collection ID and tags required"
+          puts "Usage: artifact-manager tag add <collection_id> <tag1> [tag2] ..."
+          exit 1
+        end
+        
+        @repository.tag_collection(collection_id, tags)
+        puts "✅ Tags added to collection #{collection_id}: #{tags.join(', ')}"
+        
+      when 'list'
+        if collection_id
+          collection_tags = @repository.get_collection_tags(collection_id)
+          puts "Tags for collection #{collection_id}: #{collection_tags.join(', ')}"
+        else
+          all_tags = @repository.get_all_tags
+          puts "All tags: #{all_tags.join(', ')}"
+        end
+        
+      when 'find'
+        tag = args[1]
+        unless tag
+          puts "Error: Tag required"
+          puts "Usage: artifact-manager tag find <tag>"
+          exit 1
+        end
+        
+        collections = @repository.find_collections_by_tag(tag)
+        puts "Collections tagged with '#{tag}':"
+        collections.each do |collection|
+          puts "  #{collection[:id]}: #{collection[:session_id]} (#{collection[:environment_name]})"
+        end
+        
+      else
+        puts "Error: Unknown tag action: #{action}"
+        puts "Available actions: add, set, list, find"
+        exit 1
+      end
+    end
+    
+    def cleanup_command(args)
+      max_age_days = (args[0] || 30).to_i
+      dry_run = args.include?('--dry-run')
+      
+      if dry_run
+        puts "DRY RUN: Would clean up collections older than #{max_age_days} days"
+        # TODO: Implement dry run logic
+        return
+      end
+      
+      puts "Cleaning up collections older than #{max_age_days} days..."
+      
+      cleaned_count = @repository.cleanup_old_collections(max_age_days)
+      
+      puts "✅ Cleanup completed"
+      puts "🗑️  Collections removed: #{cleaned_count}"
+    end
+    
+    def stats_command(args)
+      stats = @repository.get_repository_statistics
+      
+      puts "📊 Artifact Repository Statistics"
+      puts "=" * 40
+      puts "Collections: #{stats[:collections]}"
+      puts "Artifacts: #{stats[:artifacts]}"
+      puts "Total Size: #{format_size(stats[:total_size])}"
+      puts "Recent Collections (7 days): #{stats[:recent_collections]}"
+      puts "Total Tags: #{stats[:total_tags]}"
+      puts ""
+      
+      if stats[:by_environment].any?
+        puts "By Environment:"
+        stats[:by_environment].each do |env, count|
+          puts "  #{env}: #{count} collections"
+        end
+        puts ""
+      end
+      
+      if stats[:by_type].any?
+        puts "By Artifact Type:"
+        stats[:by_type].each do |type, count|
+          puts "  #{type}: #{count} artifacts"
+        end
+      end
+    end
+    
+    def backup_command(args)
+      backup_path = args[0] || "mitamae-artifacts-backup-#{Time.now.strftime('%Y%m%d-%H%M%S')}.tar.gz"
+      
+      puts "Creating repository backup: #{backup_path}"
+      
+      created_backup = @repository.create_repository_backup(backup_path)
+      
+      puts "✅ Repository backup created"
+      puts "📦 Backup file: #{created_backup}"
+      puts "💾 Size: #{format_size(File.size(created_backup))}"
+    end
+    
+    def restore_command(args)
+      backup_path = args[0]
+      
+      unless backup_path
+        puts "Error: Backup file path required"
+        puts "Usage: artifact-manager restore <backup_file>"
+        exit 1
+      end
+      
+      unless File.exist?(backup_path)
+        puts "Error: Backup file not found: #{backup_path}"
+        exit 1
+      end
+      
+      puts "⚠️  WARNING: This will replace the current repository!"
+      print "Are you sure you want to continue? (y/N): "
+      
+      response = STDIN.gets.chomp.downcase
+      unless %w[y yes].include?(response)
+        puts "Restore cancelled."
+        return
+      end
+      
+      puts "Restoring repository from backup: #{backup_path}"
+      
+      @repository.restore_repository_backup(backup_path)
+      
+      puts "✅ Repository restored successfully"
+    end
+    
+    def browse_command(args)
+      port = (args[0] || 8080).to_i
+      host = args[1] || 'localhost'
+      
+      @browser = ArtifactBrowser.new(@repository, port, host)
+      
+      begin
+        url = @browser.start
+        
+        puts "🌐 Artifact browser started: #{url}"
+        puts "Press Ctrl+C to stop the server"
+        
+        # Keep the main thread alive
+        loop do
+          sleep 1
+        end
+        
+      rescue Interrupt
+        puts "\nStopping artifact browser..."
+      ensure
+        @browser.stop if @browser
+      end
+    end
+    
+    def view_command(args)
+      action = args[0]
+      
+      case action
+      when 'create'
+        create_view(args[1..-1])
+      when 'list'
+        list_views
+      when 'show'
+        show_view(args[1])
+      when 'delete'
+        delete_view(args[1])
+      else
+        puts "Error: Unknown view action: #{action}"
+        puts "Available actions: create, list, show, delete"
+        exit 1
+      end
+    end
+    
+    def trends_command(args)
+      environment = args[0]
+      limit = (args[1] || 10).to_i
+      
+      filters = {}
+      filters[:environment] = environment if environment
+      
+      collections = @repository.find_collections(filters).first(limit)
+      
+      if collections.size < 2
+        puts "Not enough collections for trend analysis (need at least 2)"
+        return
+      end
+      
+      trends = @comparator.analyze_trends(collections)
+      
+      puts "📈 Trend Analysis"
+      puts "=" * 40
+      puts "Collections analyzed: #{collections.size}"
+      puts "Environment: #{environment || 'All'}"
+      puts ""
+      
+      display_trend_analysis(trends)
+    end
+    
+    # Helper methods
+    
+    def list_collections(limit)
+      collections = @repository.find_collections({}).first(limit)
+      
+      if collections.empty?
+        puts "No collections found."
+        return
+      end
+      
+      puts "📦 Collections (showing #{collections.size}):"
+      puts ""
+      
+      collections.each_with_index do |collection, index|
+        status_icon = collection[:success] ? "✅" : "❌"
+        puts "#{index + 1}. #{status_icon} #{collection[:session_id]} (ID: #{collection[:id]})"
+        puts "   Environment: #{collection[:environment_name]}"
+        puts "   Duration: #{collection[:duration]&.round(2)}s"
+        puts "   Artifacts: #{collection[:artifact_count]}"
+        puts "   Size: #{format_size(collection[:total_size])}"
+        puts "   Created: #{format_time(collection[:created_at])}"
+        puts ""
+      end
+    end
+    
+    def list_artifacts(collection_id, limit)
+      if collection_id
+        artifacts = @repository.find_artifacts(collection_id).first(limit)
+        puts "📄 Artifacts for collection #{collection_id}:"
+      else
+        artifacts = @repository.find_artifacts(nil, {}).first(limit)
+        puts "📄 All artifacts (showing #{limit}):"
+      end
+      
+      if artifacts.empty?
+        puts "No artifacts found."
+        return
+      end
+      
+      puts ""
+      
+      artifacts.each_with_index do |artifact, index|
+        puts "#{index + 1}. #{artifact[:name]} (#{artifact[:artifact_type]})"
+        puts "   ID: #{artifact[:id]}"
+        puts "   Size: #{format_size(artifact[:file_size])}"
+        puts "   Type: #{artifact[:content_type]}"
+        puts "   Created: #{format_time(artifact[:created_at])}"
+        puts ""
+      end
+    end
+    
+    def list_tags
+      tags = @repository.get_all_tags
+      
+      if tags.empty?
+        puts "No tags found."
+        return
+      end
+      
+      puts "🏷️  All tags:"
+      tags.each { |tag| puts "  #{tag}" }
+    end
+    
+    def list_views
+      views = @repository.get_artifact_views
+      
+      if views.empty?
+        puts "No saved views found."
+        return
+      end
+      
+      puts "👁️  Saved views:"
+      puts ""
+      
+      views.each_with_index do |view, index|
+        puts "#{index + 1}. #{view[:name]} (ID: #{view[:id]})"
+        puts "   Query: #{view[:query]}"
+        puts "   Created: #{format_time(view[:created_at])}"
+        puts "   Created by: #{view[:created_by]}"
+        puts ""
+      end
+    end
+    
+    def show_collection(collection_id)
+      unless collection_id
+        puts "Error: Collection ID required"
+        exit 1
+      end
+      
+      collection = @repository.get_collection(collection_id)
+      unless collection
+        puts "Error: Collection not found: #{collection_id}"
+        exit 1
+      end
+      
+      status_icon = collection[:success] ? "✅" : "❌"
+      
+      puts "📦 Collection Details"
+      puts "=" * 40
+      puts "ID: #{collection[:id]}"
+      puts "Session ID: #{collection[:session_id]}"
+      puts "Status: #{status_icon} #{collection[:success] ? 'Success' : 'Failed'}"
+      puts "Environment: #{collection[:environment_name]}"
+      puts "Duration: #{collection[:duration]&.round(2)}s"
+      puts "Total Size: #{format_size(collection[:total_size])}"
+      puts "Artifact Count: #{collection[:artifact_count]}"
+      puts "Created: #{format_time(collection[:created_at])}"
+      
+      # Show tags
+      tags = @repository.get_collection_tags(collection_id)
+      if tags.any?
+        puts "Tags: #{tags.join(', ')}"
+      end
+      
+      puts ""
+      
+      # Show artifacts by type
+      artifacts_by_type = collection[:artifacts].group_by { |a| a[:artifact_type] }
+      
+      artifacts_by_type.each do |type, artifacts|
+        puts "#{type.upcase} (#{artifacts.size}):"
+        artifacts.each do |artifact|
+          puts "  #{artifact[:name]} (#{format_size(artifact[:file_size])})"
+        end
+        puts ""
+      end
+    end
+    
+    def show_artifact(artifact_id)
+      unless artifact_id
+        puts "Error: Artifact ID required"
+        exit 1
+      end
+      
+      artifact = @repository.get_artifact(artifact_id)
+      unless artifact
+        puts "Error: Artifact not found: #{artifact_id}"
+        exit 1
+      end
+      
+      puts "📄 Artifact Details"
+      puts "=" * 40
+      puts "ID: #{artifact[:id]}"
+      puts "Name: #{artifact[:name]}"
+      puts "Type: #{artifact[:artifact_type]}"
+      puts "Content Type: #{artifact[:content_type]}"
+      puts "Size: #{format_size(artifact[:file_size])}"
+      puts "File Path: #{artifact[:file_path]}"
+      puts "Content Hash: #{artifact[:content_hash]}"
+      puts "Created: #{format_time(artifact[:created_at])}"
+      puts "Collection ID: #{artifact[:collection_id]}"
+      
+      # Show content preview for text files
+      if artifact[:content_type]&.start_with?('text/') && artifact[:file_size] < 10240 # 10KB
+        content = @repository.get_artifact_content(artifact_id)
+        if content
+          lines = content.lines
+          preview_lines = lines.first(20)
+          
+          puts ""
+          puts "Content Preview (first 20 lines):"
+          puts "-" * 40
+          preview_lines.each_with_index do |line, index|
+            puts "#{index + 1:3}: #{line}"
+          end
+          
+          if lines.size > 20
+            puts "... (#{lines.size - 20} more lines)"
+          end
+        end
+      end
+    end
+    
+    def show_view(view_id)
+      unless view_id
+        puts "Error: View ID required"
+        exit 1
+      end
+      
+      results = @repository.execute_artifact_view(view_id)
+      unless results
+        puts "Error: View not found: #{view_id}"
+        exit 1
+      end
+      
+      puts "👁️  View Results: #{view_id}"
+      puts "=" * 40
+      puts "Found #{results.size} artifacts"
+      puts ""
+      
+      results.each_with_index do |result, index|
+        puts "#{index + 1}. #{result[:artifact_name]} (#{result[:artifact_type]})"
+        puts "   Collection: #{result[:session_id]}"
+        puts "   Environment: #{result[:environment_name]}"
+        puts "   Size: #{format_size(result[:file_size])}"
+        puts ""
+      end
+    end
+    
+    def create_view(args)
+      name = args[0]
+      query = args[1]
+      
+      unless name && query
+        puts "Error: View name and query required"
+        puts "Usage: artifact-manager view create <name> <query> [--environment=ENV]"
+        exit 1
+      end
+      
+      # Parse filters
+      filters = {}
+      args[2..-1]&.each do |arg|
+        if arg.start_with?('--environment=')
+          filters[:environment] = arg.split('=', 2)[1]
+        elsif arg.start_with?('--type=')
+          filters[:artifact_type] = arg.split('=', 2)[1]
+        end
+      end
+      
+      view = @repository.create_artifact_view(name, query, filters)
+      
+      puts "✅ View created successfully"
+      puts "👁️  View ID: #{view[:id]}"
+      puts "📝 Name: #{view[:name]}"
+      puts "🔍 Query: #{view[:query]}"
+      puts "🏷️  Filters: #{filters}" if filters.any?
+    end
+    
+    def delete_view(view_id)
+      # TODO: Implement view deletion
+      puts "View deletion not yet implemented"
+    end
+    
+    def display_comparison_text(comparison)
+      puts "🔍 Collection Comparison"
+      puts "=" * 50
+      puts "Collection 1: #{comparison[:collection1][:session_id]} (ID: #{comparison[:collection1][:id]})"
+      puts "Collection 2: #{comparison[:collection2][:session_id]} (ID: #{comparison[:collection2][:id]})"
+      puts "Compared at: #{format_time(comparison[:compared_at])}"
+      puts ""
+      
+      # Summary
+      summary = comparison[:summary]
+      if summary[:overall_significance] == 'minimal'
+        puts "✅ No significant differences found"
+      else
+        puts "⚠️  Significant differences detected (#{summary[:overall_significance]} significance)"
+        puts ""
+        puts "Changes:"
+        summary[:significant_changes].each { |change| puts "  • #{change}" }
+      end
+      
+      puts ""
+      
+      # Metadata differences
+      metadata = comparison[:differences][:metadata]
+      if metadata[:success_change]
+        puts "🚨 Test result changed: #{comparison[:collection1][:success]} → #{comparison[:collection2][:success]}"
+      end
+      
+      if metadata[:duration_diff].abs > 10
+        puts "⏱️  Duration change: #{metadata[:duration_diff].round(2)}s"
+      end
+      
+      if metadata[:size_diff].abs > 1024
+        puts "💾 Size change: #{format_size(metadata[:size_diff])}"
+      end
+      
+      # Recommendations
+      if comparison[:recommendations].any?
+        puts ""
+        puts "💡 Recommendations:"
+        comparison[:recommendations].each do |rec|
+          priority_icon = rec[:priority] == 'high' ? '🔴' : rec[:priority] == 'medium' ? '🟡' : '🟢'
+          puts "  #{priority_icon} #{rec[:message]}"
+        end
+      end
+    end
+    
+    def display_trend_analysis(trends)
+      # Overall assessment
+      assessment = trends[:overall_assessment]
+      status_icon = assessment[:status] == 'healthy' ? '✅' : '⚠️'
+      
+      puts "Overall Status: #{status_icon} #{assessment[:status].capitalize}"
+      
+      if assessment[:issues].any?
+        puts "Issues:"
+        assessment[:issues].each { |issue| puts "  • #{issue}" }
+      end
+      
+      puts ""
+      
+      # Individual trends
+      %i[size_trend duration_trend artifact_count_trend].each do |trend_type|
+        trend = trends[trend_type]
+        next unless trend && trend[:metric]
+        
+        trend_icon = case trend[:trend]
+                     when 'increasing' then '📈'
+                     when 'decreasing' then '📉'
+                     else '➡️'
+                     end
+        
+        puts "#{trend_icon} #{trend[:metric]}: #{trend[:trend]} (slope: #{trend[:slope]})"
+        puts "   Current: #{trend[:current_value]}"
+        puts "   Range: #{trend[:min_value]} - #{trend[:max_value]}"
+        puts "   Average: #{trend[:average]}"
+        puts ""
+      end
+      
+      # Success rate
+      if trends[:success_rate_trend]
+        success_rate = trends[:success_rate_trend][:current_success_rate]
+        rate_icon = success_rate >= 90 ? '✅' : success_rate >= 70 ? '⚠️' : '❌'
+        puts "#{rate_icon} Success Rate: #{success_rate}%"
+        puts ""
+      end
+      
+      # Error patterns
+      if trends[:error_patterns]
+        error_patterns = trends[:error_patterns]
+        puts "🐛 Error Patterns:"
+        puts "   Failure Rate: #{error_patterns[:failure_rate]}%"
+        puts "   Recent Failures: #{error_patterns[:recent_failures]}"
+      end
+    end
+    
+    def generate_comparison_html(comparison)
+      # Simple HTML generation for comparison
+      <<~HTML
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Collection Comparison</title>
+          <style>
+            body { font-family: Arial, sans-serif; margin: 20px; }
+            .header { background: #f5f5f5; padding: 15px; border-radius: 5px; }
+            .section { margin: 20px 0; }
+            .significant { color: red; font-weight: bold; }
+            .minimal { color: green; }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>Collection Comparison</h1>
+            <p>Collection 1: #{comparison[:collection1][:session_id]}</p>
+            <p>Collection 2: #{comparison[:collection2][:session_id]}</p>
+            <p>Compared at: #{comparison[:compared_at]}</p>
+          </div>
+          
+          <div class="section">
+            <h2>Summary</h2>
+            <p class="#{comparison[:summary][:overall_significance]}">
+              Overall significance: #{comparison[:summary][:overall_significance]}
+            </p>
+            
+            #{comparison[:summary][:significant_changes].map { |change| "<li>#{change}</li>" }.join}
+          </div>
+          
+          <div class="section">
+            <h2>Recommendations</h2>
+            #{comparison[:recommendations].map { |rec| "<li><strong>#{rec[:priority].upcase}:</strong> #{rec[:message]}</li>" }.join}
+          </div>
+        </body>
+        </html>
+      HTML
+    end
+    
+    def format_size(bytes)
+      return "0 B" if bytes.nil? || bytes == 0
+      
+      units = %w[B KB MB GB TB]
+      size = bytes.to_f
+      unit_index = 0
+      
+      while size >= 1024.0 && unit_index < units.length - 1
+        size /= 1024.0
+        unit_index += 1
+      end
+      
+      "#{size.round(2)} #{units[unit_index]}"
+    end
+    
+    def format_time(time_string)
+      return 'Unknown' unless time_string
+      
+      Time.parse(time_string).strftime('%Y-%m-%d %H:%M:%S')
+    rescue
+      time_string
+    end
+    
+    def show_help
+      puts <<~HELP
+        Mitamae Artifact Management Tool
+        
+        Usage:
+          artifact-manager <command> [options]
+        
+        Commands:
+          init                           Initialize artifact repository
+          import <path>                  Import collection from file/directory
+          export <id> [path] [format]    Export collection (formats: tar_gz, zip, directory)
+          
+          search <query> [filters]       Search artifact content
+            --environment=ENV            Filter by environment
+            --type=TYPE                  Filter by artifact type
+            --success=true/false         Filter by test success
+          
+          list <type> [limit]            List items (types: collections, artifacts, tags, views)
+          show <type> <id>               Show details (types: collection, artifact, view)
+          
+          compare <id1> <id2> [format]   Compare two collections (formats: text, json, html)
+          
+          tag <action> <id> [tags...]    Manage collection tags
+            add <id> <tag...>            Add tags to collection
+            list [id]                    List tags (for collection or all)
+            find <tag>                   Find collections with tag
+          
+          view <action> [options]        Manage saved views
+            create <name> <query>        Create new view
+            list                         List all views
+            show <id>                    Execute view
+          
+          cleanup [days]                 Clean up old collections (default: 30 days)
+          stats                          Show repository statistics
+          trends [env] [limit]           Show trend analysis
+          
+          backup [path]                  Create repository backup
+          restore <path>                 Restore from backup
+          
+          browse [port] [host]           Start web browser (default: 8080, localhost)
+          
+          help                           Show this help message
+        
+        Environment Variables:
+          MITAMAE_ARTIFACT_REPO         Repository path (default: ~/.mitamae/artifacts)
+        
+        Examples:
+          artifact-manager init
+          artifact-manager search "error" --environment=prod
+          artifact-manager compare 1 2 html
+          artifact-manager tag add 1 production critical
+          artifact-manager browse 9090
+          artifact-manager trends production 20
+      HELP
+    end
+  end
+end
+
+# Run the CLI if this script is executed directly
+if __FILE__ == $0
+  begin
+    cli = MitamaeTest::ArtifactManagerCLI.new
+    cli.run(ARGV)
+  rescue Interrupt
+    puts "\nOperation cancelled."
+    exit 130
+  rescue => e
+    puts "Fatal error: #{e.message}"
+    puts e.backtrace.first(5).join("\n") if ENV['DEBUG']
+    exit 1
+  end
+end
