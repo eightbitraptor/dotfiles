@@ -1,0 +1,103 @@
+# Test specification for package management recipes
+---
+name: arch_packages
+description: Test package installation on Arch Linux
+tags:
+  - packages
+  - arch
+  - core
+
+recipe:
+  path: recipes/packages.rb
+  node_json:
+    packages:
+      development:
+        - base-devel
+        - git
+        - neovim
+      utilities:
+        - ripgrep
+        - fd
+        - bat
+
+environment:
+  type: container
+  distribution: arch
+
+setup:
+  commands:
+    - pacman -Sy --noconfirm
+
+validators:
+  - type: package
+    config:
+      packages:
+        - name: base-devel
+          action: installed
+        - name: git
+          action: installed
+        - name: neovim
+          action: installed
+        - name: ripgrep
+          action: installed
+          
+  - type: functional_test
+    config:
+      applications:
+        - name: git
+          command: git --version
+          expected_output: "git version"
+        - name: neovim
+          command: nvim --version
+          expected_output: "NVIM"
+          
+  - type: idempotency
+    config:
+      check_packages: true
+
+options:
+  timeout: 300
+  parallel_group: package_tests
+
+---
+name: ubuntu_packages
+description: Test package installation on Ubuntu
+tags:
+  - packages
+  - ubuntu
+  - core
+
+recipe:
+  path: recipes/packages.rb
+  node_json:
+    platform: ubuntu
+    packages:
+      development:
+        - build-essential
+        - git
+        - neovim
+
+environment:
+  type: container
+  distribution: ubuntu
+
+dependencies:
+  requires:
+    - ubuntu_base_setup
+
+validators:
+  - type: package
+    config:
+      packages:
+        - name: build-essential
+          action: installed
+        - name: git
+          action: installed
+          
+  - type: idempotency
+    config:
+      check_packages: true
+
+options:
+  timeout: 300
+  parallel_group: package_tests

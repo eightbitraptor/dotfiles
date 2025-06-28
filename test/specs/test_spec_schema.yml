@@ -1,0 +1,198 @@
+# Test Specification Schema for Mitamae Recipe Testing
+# This file documents the complete YAML specification format
+---
+# Test specification metadata
+version: "1.0"
+schema_version: "1.0"
+
+# Example test specification structure
+test_spec:
+  # Required: Unique identifier for this test
+  name: string
+  
+  # Optional: Human-readable description
+  description: string
+  
+  # Optional: Tags for filtering and organization
+  tags: 
+    - string
+    - string
+  
+  # Optional: Skip this test with reason
+  skip: 
+    reason: string
+    until: date  # Optional: automatically re-enable after date
+  
+  # Required: Target recipe configuration
+  recipe:
+    # Path to the recipe file
+    path: string
+    
+    # Optional: Node attributes
+    node_json: object
+    
+    # Optional: Data bags
+    data_bags:
+      bag_name:
+        item_name: object
+    
+    # Optional: Environment variables
+    environment:
+      KEY: value
+  
+  # Optional: Test dependencies
+  dependencies:
+    # Other test specs that must run first
+    requires:
+      - test_name
+      - test_name
+    
+    # Tests that should run after this one
+    before:
+      - test_name
+  
+  # Required: Test environment configuration
+  environment:
+    # Type of environment (container, vm, local)
+    type: string
+    
+    # Target distribution
+    distribution: string
+    
+    # Optional: Environment-specific options
+    options:
+      # For containers
+      image: string
+      volumes: array
+      
+      # For VMs
+      box: string
+      memory: integer
+      cpus: integer
+  
+  # Optional: Pre-test setup
+  setup:
+    # Commands to run before the test
+    commands:
+      - string
+      - string
+    
+    # Files to copy
+    files:
+      - source: string
+        destination: string
+        
+    # Packages to install
+    packages:
+      - string
+      - string
+  
+  # Required: Validators to run
+  validators:
+    # Package validator configuration
+    - type: package
+      config:
+        packages:
+          - name: string
+            version: string  # Optional
+            action: installed|removed|purged
+    
+    # Service validator configuration
+    - type: service
+      config:
+        services:
+          - name: string
+            state: running|stopped|enabled|disabled
+            
+    # Configuration file validator
+    - type: configuration_file
+      config:
+        files:
+          - path: string
+            type: regular|symlink|template
+            permissions:
+              mode: string
+              owner: string
+              group: string
+            content_match: string
+            
+    # Idempotency validator
+    - type: idempotency
+      config:
+        check_packages: boolean
+        check_services: boolean
+        check_files:
+          - string
+          
+    # Functional test validator
+    - type: functional_test
+      config:
+        applications:
+          - name: string
+            command: string
+            expected_output: string
+            
+    # Custom validator
+    - type: custom
+      name: string
+      config: object
+  
+  # Optional: Post-test cleanup
+  cleanup:
+    # Always run cleanup, even on failure
+    always: boolean
+    
+    # Cleanup commands
+    commands:
+      - string
+      - string
+  
+  # Optional: Test execution options
+  options:
+    # Timeout in seconds
+    timeout: integer
+    
+    # Number of retries on failure
+    retries: integer
+    
+    # Continue on validator failure
+    continue_on_error: boolean
+    
+    # Parallel execution group
+    parallel_group: string
+    
+    # Resource requirements
+    resources:
+      cpu: float
+      memory: string  # e.g., "512M", "2G"
+      disk: string    # e.g., "10G"
+
+# Schema validation rules
+validation_rules:
+  required_fields:
+    - name
+    - recipe.path
+    - environment.type
+    - environment.distribution
+    - validators
+    
+  field_types:
+    name: 
+      type: string
+      pattern: "^[a-zA-Z0-9_-]+$"
+    tags:
+      type: array
+      items: string
+    timeout:
+      type: integer
+      minimum: 1
+      maximum: 3600
+    
+  validator_types:
+    enum:
+      - package
+      - service
+      - configuration_file
+      - idempotency
+      - functional_test
+      - custom

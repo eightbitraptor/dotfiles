@@ -1,0 +1,113 @@
+# Example validation specification demonstrating all validators
+---
+name: dotfiles_validation
+description: Comprehensive validation of dotfiles configuration
+
+# Configuration file validation examples
+configuration_files:
+  - path: ~/.config/git/config
+    type: regular
+    required: true
+    permissions:
+      mode: '644'
+      owner: ${USER}
+    required_content:
+      - 'user.email'
+      - 'user.name'
+    
+  - path: ~/.config/nvim
+    type: symlink
+    target: ${DOTFILES}/files/neovim
+    required: true
+    
+  - path: ~/.bashrc
+    type: template
+    syntax: shell
+    forbidden_content:
+      - 'export.*PASSWORD'
+      - 'export.*SECRET'
+    max_size: 102400  # 100KB
+    
+  - path: ~/.ssh/config
+    type: regular
+    permissions:
+      mode: '600'
+      owner: ${USER}
+    required_content:
+      - 'Host \*'
+      
+# Idempotency validation
+idempotency_tests:
+  - recipe_path: recipes/packages.rb
+    node_json:
+      platform: arch
+    check_packages: true
+    check_services: false
+    check_files:
+      - /usr/local/bin/custom-tool
+      
+  - recipe_path: recipes/dotfiles.rb
+    check_files:
+      - ~/.bashrc
+      - ~/.config/git/config
+      - ~/.config/nvim/init.lua
+    check_packages: false
+    
+# Functional application tests
+applications:
+  - name: git
+    command: git --version
+    version_check:
+      command: git --version
+      expected: "^git version 2\\."
+    expected_output: "git version"
+    
+  - name: neovim
+    command: nvim --version
+    expect_success: true
+    version_check:
+      command: nvim --version | head -1
+      expected: "NVIM v0\\.[89]"
+    graphical:
+      launch_command: nvim --headless +qa
+      
+  - name: ssh-agent
+    service: ssh-agent
+    check_enabled: false
+    check_logs: true
+    
+  - name: docker
+    service: docker
+    check_enabled: true
+    process_check:
+      process_name: dockerd
+      check_resources: true
+      max_cpu: 50.0
+      max_memory: 10.0
+    endpoints:
+      - type: unix
+        path: /var/run/docker.sock
+        test_command: docker version
+        
+  - name: web-server
+    endpoints:
+      - type: http
+        url: http://localhost:8080
+        expected_code: 200
+        expected_content: "Welcome"
+        timeout: 10
+      - type: tcp
+        host: localhost
+        port: 8080
+        
+  - name: custom-app
+    test_script: ./test/scripts/test_custom_app.sh
+    test_timeout: 30
+    test_output_format: tap
+
+# Validation options
+validation_options:
+  parallel: true
+  stop_on_failure: false
+  retry_failed: true
+  max_retries: 2

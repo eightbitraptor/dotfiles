@@ -1,0 +1,89 @@
+# Test specification for dotfile management
+---
+name: dotfiles_symlinks
+description: Test dotfile symlink creation and management
+tags:
+  - dotfiles
+  - configuration
+  - critical
+
+recipe:
+  path: recipes/dotfiles.rb
+  node_json:
+    dotfiles_dir: /tmp/dotfiles
+    user: testuser
+    
+environment:
+  type: local
+  distribution: arch
+
+setup:
+  commands:
+    - mkdir -p /tmp/dotfiles/files/{git,neovim,bash}
+    - echo "test config" > /tmp/dotfiles/files/git/gitconfig
+    - echo "vim.opt.number = true" > /tmp/dotfiles/files/neovim/init.lua
+    - echo "export PATH=$PATH:/usr/local/bin" > /tmp/dotfiles/files/bash/bashrc
+
+validators:
+  - type: configuration_file
+    config:
+      files:
+        - path: ~/.config/git/config
+          type: symlink
+          target: /tmp/dotfiles/files/git/gitconfig
+        - path: ~/.config/nvim/init.lua
+          type: symlink
+          target: /tmp/dotfiles/files/neovim/init.lua
+        - path: ~/.bashrc
+          type: symlink
+          target: /tmp/dotfiles/files/bash/bashrc
+          
+  - type: idempotency
+    config:
+      check_files:
+        - ~/.config/git/config
+        - ~/.config/nvim/init.lua
+        - ~/.bashrc
+
+cleanup:
+  always: true
+  commands:
+    - rm -rf ~/.config/git/config ~/.config/nvim ~/.bashrc
+    - rm -rf /tmp/dotfiles
+
+options:
+  timeout: 60
+  
+---
+name: dotfiles_permissions
+description: Test dotfile permission management
+tags:
+  - dotfiles
+  - security
+  - permissions
+
+dependencies:
+  requires:
+    - dotfiles_symlinks
+
+recipe:
+  path: recipes/dotfiles_permissions.rb
+  
+environment:
+  type: local
+  distribution: arch
+
+validators:
+  - type: configuration_file
+    config:
+      files:
+        - path: ~/.ssh/config
+          type: regular
+          permissions:
+            mode: "600"
+            owner: ${USER}
+        - path: ~/.gnupg
+          type: directory
+          permissions:
+            mode: "700"
+            owner: ${USER}
