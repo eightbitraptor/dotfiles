@@ -47,6 +47,20 @@ require('pckr').add{
         'nvim-treesitter/nvim-treesitter',
         run = { ':TSUpdate' }
     };
+    {
+      'saghen/blink.cmp',
+      run = "cargo build --release",
+      config = function()
+        require('blink.cmp').setup({
+          appearance = {
+            nerd_font_variant = 'mono'
+          },
+          keymap = { preset = 'super-tab' },
+          completion = { documentation = { auto_show = false } },
+          fuzzy = { implemetation = "rust" },
+        })
+      end
+    };
 
     -- Terminal
     'numToStr/FTerm.nvim';
@@ -367,7 +381,7 @@ map('n', '<leader>gW', vim.lsp.buf.workspace_symbol)
 -- map('n', '<leader>ao', vim.lsp.buf.outgoing_calls)
 
 map('n', '<leader>ac', '<cmd>ClaudeCode<cr>', { desc = 'Toggle Claude Code' })
-map('n', '<leader>as', '<cmd>ClaudeCodeSend<cr>', { desc = 'Send to Claude Code' })
+map('v', '<leader>as', '<cmd>ClaudeCodeSend<cr>', { desc = 'Send to Claude Code' })
 
 autocmd({"BufRead"}, {
     pattern = "**/ruby/**/*.c",
