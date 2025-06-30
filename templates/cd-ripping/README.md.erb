@@ -1,0 +1,162 @@
+# CD Ripping Pipeline
+
+Comprehensive CD ripping workflow with whipper, beets, and multi-format output.
+
+## Quick Start
+
+1. **First-time setup**: Detect your CD drive offset
+   ```bash
+   <%= bin_dir %>/detect-drive-offset.sh
+   ```
+
+2. **Rip a CD**: Insert CD and run the main script
+   ```bash
+   <%= bin_dir %>/rip-cd.py
+   ```
+
+## Features
+
+- **AccurateRip Verification**: All tracks verified against AccurateRip database
+- **Multi-source Metadata**: MusicBrainz, Discogs, and Last.fm integration
+- **Dual Format Output**: FLAC (lossless) and MP3 (320kbps) versions
+- **Album Artwork**: Downloaded and embedded into files + stored as cover.jpg
+- **Comprehensive Reports**: Detailed accuracy and metadata reports
+- **Automatic Cleanup**: Staging files cleaned up automatically
+
+## Directory Structure
+
+- **FLAC Library**: `<%= flac_dir %>`
+- **MP3 Library**: `<%= mp3_dir %>`
+- **Staging Area**: `<%= staging_dir %>`
+
+## File Naming Convention
+
+```
+<AlbumArtist>/<AlbumName>/<TrackNum>-<TrackTitle>.<extension>
+```
+
+Example:
+```
+Pink Floyd/The Dark Side of the Moon/01-Speak to Me.flac
+Pink Floyd/The Dark Side of the Moon/02-Breathe.flac
+Pink Floyd/The Dark Side of the Moon/cover.jpg
+Pink Floyd/The Dark Side of the Moon/rip-report.txt
+```
+
+## Command Options
+
+### Main Ripping Script
+
+```bash
+<%= bin_dir %>/rip-cd.py [options]
+```
+
+Options:
+- `--device /dev/sr1`: Use different CD device (default: /dev/sr0)
+- `--skip-mp3`: Only rip to FLAC, skip MP3 conversion
+- `--keep-staging`: Don't delete staging files after completion
+
+### Drive Offset Detection
+
+```bash
+<%= bin_dir %>/detect-drive-offset.sh [device]
+```
+
+Detects and configures your CD drive's read offset for accurate ripping.
+
+### Manual Cleanup
+
+```bash
+<%= bin_dir %>/cleanup-rip-staging.sh
+```
+
+Manually clean staging files older than 7 days.
+
+## Troubleshooting
+
+### Common Issues
+
+1. **Permission Denied on CD Device**
+   ```bash
+   # Check if you're in the correct group
+   groups
+   # Should include 'optical' (Arch) or 'cdrom' (Fedora/Void)
+   ```
+
+2. **AccurateRip Not Finding Matches**
+   - Try a different commercial CD for offset detection
+   - Check that the CD is clean and undamaged
+   - Some CDs may not be in the AccurateRip database
+
+3. **Metadata Not Found**
+   - Check internet connection
+   - Verify CD is in MusicBrainz database
+   - Manual metadata entry may be required for obscure releases
+
+4. **MP3 Conversion Fails**
+   - Ensure ffmpeg is installed and working
+   - Check available disk space
+   - Verify FLAC files were created successfully
+
+### Log Files
+
+- **Main Log**: `~/.local/share/cd-ripping.log`
+- **Beets Log**: `~/.config/beets/import.log`
+- **Cleanup Log**: `~/.local/share/cleanup.log`
+
+### Configuration Files
+
+- **Whipper**: `~/.config/whipper/whipper.conf`
+- **Beets**: `~/.config/beets/config.yaml`
+
+## Workflow Details
+
+1. **Whipper Rip**: CD ripped to FLAC with AccurateRip verification
+2. **Beets Import**: Files imported with metadata enhancement
+3. **Album Art**: Downloaded from multiple sources and embedded
+4. **MP3 Conversion**: FLAC files converted to 320kbps MP3
+5. **Report Generation**: Comprehensive rip report created
+6. **Cleanup**: Staging files removed (unless --keep-staging)
+
+## Advanced Usage
+
+### Custom Beets Queries
+
+```bash
+# List recently imported albums
+beet list added:-1d..
+
+# Re-import with better metadata
+beet import --autotag /path/to/album
+
+# Convert specific albums to MP3
+beet convert -f mp3 artist:"Pink Floyd"
+
+# Fetch missing album art
+beet fetchart artist:"Pink Floyd"
+```
+
+### Manual Metadata Correction
+
+```bash
+# Edit album metadata
+beet modify artist:"Pink Floyd" genre="Progressive Rock"
+
+# Re-fetch album art
+beet fetchart --force artist:"Pink Floyd"
+
+# Update file tags
+beet write artist:"Pink Floyd"
+```
+
+## Automatic Maintenance
+
+The system includes automatic cleanup via systemd timer:
+- Runs daily at 3 AM
+- Removes staging files older than 7 days
+- Rotates log files when they exceed 10MB
+
+Check timer status:
+```bash
+systemctl --user status rip-cleanup.timer
+```

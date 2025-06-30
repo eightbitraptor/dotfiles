@@ -1,0 +1,44 @@
+[drive:ATAPI]
+# Auto-detected drive settings
+offset = 0
+defeats_cache = True
+read_offset = 0
+
+[whipper.common.config]
+# Output directory for rips
+path_filter_fat = True
+path_filter_special = True
+
+[whipper.common.directory]
+# Default working directory for temporary files
+working_directory = <%= staging_dir %>
+
+[whipper.common.encode]
+# FLAC encoding settings
+flac = flac --silent --best --force-raw-format --endian=little --sign=signed --channels=2 --bps=16 --sample-rate=44100 --output-name="%(path)s" -
+
+[whipper.image.image]
+# Image format settings
+format = flac
+
+[whipper.program.cdparanoia]
+# CD reading settings
+# Use maximum retries for accuracy
+retries = 20
+
+[whipper.program.flac]
+# FLAC specific settings
+quality = 8
+
+[logger]
+# Use EAC-compatible logger for human-readable logs
+name = eaclogger
+
+[musicbrainz]
+# MusicBrainz server settings
+server = musicbrainz.org
+
+[accuraterip]
+# AccurateRip verification settings
+max_cache_entries = 1000
+cache_directory = ~/.cache/whipper/accuraterip

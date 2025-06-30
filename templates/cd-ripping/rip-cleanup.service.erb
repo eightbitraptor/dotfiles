@@ -1,0 +1,13 @@
+[Unit]
+Description=CD Ripping Staging Cleanup Service
+Documentation=man:systemd.service(5)
+
+[Service]
+Type=oneshot
+ExecStart=<%= cleanup_script %>
+User=%i
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=default.target

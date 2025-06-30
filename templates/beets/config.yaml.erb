@@ -1,0 +1,151 @@
+directory: <%= flac_library %>
+library: <%= flac_library %>/beets-library.db
+
+# Import settings
+import:
+    move: yes
+    copy: no
+    write: yes
+    log: ~/.config/beets/import.log
+    resume: ask
+    incremental: yes
+    quiet_fallback: skip
+    detail: yes
+    flat: no
+
+# Multi-source metadata configuration
+musicbrainz:
+    host: musicbrainz.org
+    user: ''
+    pass: ''
+    searchlimit: 10
+    
+# Path formatting
+paths:
+    default: %albumartist/%album/%track - %title
+    singleton: Singles/%artist - %title
+    comp: Compilations/%album/%track - %title
+    albumtype:soundtrack: Soundtracks/%album/%track - %title
+
+# Plugins configuration
+plugins:
+    - fetchart
+    - embedart
+    - convert
+    - discogs
+    - lastfm
+    - duplicates
+    - info
+    - badfiles
+    - scrub
+    - replaygain
+
+# Album art configuration
+fetchart:
+    auto: yes
+    sources: 
+        - filesystem
+        - coverart
+        - discogs
+        - itunes
+        - amazon
+        - albumart
+        - lastfm
+        - fanarttv
+        - google
+    store_source: yes
+    cautious: false
+    cover_names: cover folder album art front
+    minwidth: 300
+    maxwidth: 1400
+    enforce_ratio: no
+    
+embedart:
+    auto: yes
+    ifempty: no
+    maxwidth: 1000
+    quality: 95
+    remove_art_file: no
+
+# Discogs plugin configuration
+discogs:
+    source_weight: 0.5
+    user_token: ''
+    separator: ', '
+    
+# Last.fm plugin configuration  
+lastfm:
+    source_weight: 0.4
+    user: ''
+    api_key: ''
+    
+# Convert plugin for MP3 generation
+convert:
+    auto: no
+    dest: <%= mp3_dir %>
+    format: mp3
+    formats:
+        mp3:
+            command: ffmpeg -i $source -y -vn -aq 0 $dest
+            extension: mp3
+    max_bitrate: 320
+    threads: 0
+    embed: yes
+    copy_album_art: yes
+    album_art_maxwidth: 1000
+    paths:
+        default: %albumartist/%album/%track - %title
+
+# Duplicate detection
+duplicates:
+    album: no
+    checksum: no
+    copy: no
+    count: no
+    delete: no
+    full: no
+    keys: []
+    move: no
+    path: no
+    strict: no
+    tag: no
+    tiebreak: {}
+
+# ReplayGain for volume normalization
+replaygain:
+    auto: yes
+    backend: gstreamer
+    overwrite: no
+    targetlevel: 89
+
+# File checking
+badfiles:
+    check_on_import: yes
+    commands:
+        flac: flac --test --silent
+        mp3: mp3val
+
+# Metadata scrubbing
+scrub:
+    auto: yes
+
+# Replace problematic characters in filenames
+replace:
+    '^\.': _
+    '[\x00-\x1f]': _
+    '[<>:"\?\*\|]': _
+    '[\x7f-\x9f]': _
+    '^-': _
+
+# ID3v2.3 for better compatibility
+id3v23: yes
+
+# Terminal colors
+color: yes
+
+# Verbose logging
+verbose: 1
+
+# Item fields
+item_fields:
+    disc_and_track: u'%02i.%02i' % (disc, track) if disctotal > 1 else u'%02i' % (track)

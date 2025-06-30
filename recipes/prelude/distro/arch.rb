@@ -36,3 +36,9 @@ execute "build and install yay" do
   cwd "/tmp/yay-build"
   not_if "pacman -Q yay"
 end
+
+# Include AUR package plugin for Arch Linux
+if node.distro == "arch"
+  include_recipe File.expand_path("../recipes/plugins/aur_package.rb", __dir__)
+end
+

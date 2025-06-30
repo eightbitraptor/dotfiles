@@ -1,0 +1,47 @@
+#!/bin/bash
+# Drive Offset Detection Helper Script
+# Detects CD drive read offset for accurate ripping
+
+set -euo pipefail
+
+DEVICE="${1:-/dev/sr0}"
+
+echo "=== CD Drive Offset Detection ==="
+echo "Device: $DEVICE"
+echo
+
+# Check if device exists
+if [[ ! -e "$DEVICE" ]]; then
+    echo "ERROR: CD device $DEVICE not found"
+    exit 1
+fi
+
+# Check if whipper is installed
+if ! command -v whipper &> /dev/null; then
+    echo "ERROR: whipper not found in PATH"
+    exit 1
+fi
+
+echo "Detecting drive information..."
+whipper drive analyze --device "$DEVICE"
+
+echo
+echo "Detecting read offset..."
+echo "NOTE: This requires a known CD in the AccurateRip database"
+echo "Insert a commercial CD and press Enter to continue..."
+read -r
+
+# Run offset detection
+if whipper offset find --device "$DEVICE"; then
+    echo
+    echo "SUCCESS: Drive offset detected and configured"
+    echo "Check ~/.config/whipper/whipper.conf for settings"
+else
+    echo
+    echo "WARNING: Offset detection failed or incomplete"
+    echo "You may need to manually configure the offset"
+    echo "Check whipper documentation for your drive model"
+fi
+
+echo
+echo "Drive configuration complete!"

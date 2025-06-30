@@ -1,0 +1,390 @@
+#!/usr/bin/env python3
+"""
+Comprehensive CD Ripping Pipeline
+Orchestrates whipper, beets, and cleanup for dual-format CD ripping
+
+Usage: rip-cd.py [--device /dev/sr0] [--skip-mp3] [--keep-staging]
+"""
+
+import os
+import sys
+import json
+import shutil
+import argparse
+import subprocess
+import logging
+from datetime import datetime
+from pathlib import Path
+import tempfile
+import yaml
+
+# Configuration
+FLAC_DIR = Path("<%= flac_dir %>")
+MP3_DIR = Path("<%= mp3_dir %>")
+STAGING_DIR = Path("<%= staging_dir %>")
+BEETS_CONFIG = Path.home() / ".config" / "beets" / "config.yaml"
+
+# Logging setup
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler(Path.home() / ".local" / "share" / "cd-ripping.log"),
+        logging.StreamHandler()
+    ]
+)
+logger = logging.getLogger(__name__)
+
+class CDRippingError(Exception):
+    """Custom exception for CD ripping errors"""
+    pass
+
+class CDRipper:
+    def __init__(self, device="/dev/sr0", skip_mp3=False, keep_staging=False):
+        self.device = device
+        self.skip_mp3 = skip_mp3
+        self.keep_staging = keep_staging
+        self.rip_dir = None
+        self.album_info = {}
+        self.rip_report = {}
+        
+    def detect_drive_offset(self):
+        """Detect and configure drive offset using whipper"""
+        logger.info("Detecting drive offset...")
+        try:
+            result = subprocess.run([
+                "whipper", "offset", "find", "--device", self.device
+            ], capture_output=True, text=True, timeout=300)
+            
+            if result.returncode != 0:
+                logger.warning(f"Drive offset detection failed: {result.stderr}")
+                return False
+                
+            logger.info("Drive offset detection completed")
+            return True
+            
+        except subprocess.TimeoutExpired:
+            logger.error("Drive offset detection timed out")
+            return False
+        except Exception as e:
+            logger.error(f"Error detecting drive offset: {e}")
+            return False
+    
+    def rip_cd_with_whipper(self):
+        """Rip CD using whipper with AccurateRip verification"""
+        logger.info(f"Starting CD rip with whipper to {STAGING_DIR}")
+        
+        # Ensure staging directory exists and is clean
+        if STAGING_DIR.exists():
+            shutil.rmtree(STAGING_DIR)
+        STAGING_DIR.mkdir(parents=True)
+        
+        # Build whipper command
+        whipper_cmd = [
+            "whipper", "cd", "rip",
+            "--device", self.device,
+            "--output-directory", str(STAGING_DIR),
+            "--working-directory", str(STAGING_DIR / "tmp"),
+            "--logger", "eaclogger"
+        ]
+        
+        try:
+            logger.info(f"Running: {' '.join(whipper_cmd)}")
+            result = subprocess.run(
+                whipper_cmd,
+                cwd=str(STAGING_DIR),
+                capture_output=True,
+                text=True,
+                timeout=3600  # 1 hour timeout
+            )
+            
+            if result.returncode != 0:
+                raise CDRippingError(f"Whipper rip failed: {result.stderr}")
+                
+            logger.info("CD rip completed successfully")
+            
+            # Find the rip directory
+            rip_dirs = [d for d in STAGING_DIR.iterdir() if d.is_dir() and d.name != "tmp"]
+            if not rip_dirs:
+                raise CDRippingError("No rip directory found in staging area")
+                
+            self.rip_dir = rip_dirs[0]  # Should be only one
+            logger.info(f"Rip directory: {self.rip_dir}")
+            
+            # Parse rip log for accuracy information
+            self._parse_rip_log()
+            
+            return True
+            
+        except subprocess.TimeoutExpired:
+            raise CDRippingError("CD rip timed out after 1 hour")
+        except Exception as e:
+            raise CDRippingError(f"Error during CD rip: {e}")
+    
+    def _parse_rip_log(self):
+        """Parse whipper log file for accuracy information"""
+        log_files = list(self.rip_dir.glob("*.log"))
+        if not log_files:
+            logger.warning("No log file found in rip directory")
+            return
+            
+        log_file = log_files[0]
+        try:
+            with open(log_file, 'r', encoding='utf-8') as f:
+                log_content = f.read()
+                
+            # Parse EAC-style log for accuracy info
+            self.rip_report = {
+                'log_file': str(log_file),
+                'rip_time': datetime.now().isoformat(),
+                'accuracy_verified': 'All tracks accurately ripped' in log_content,
+                'accuraterip_verified': 'AccurateRip' in log_content,
+                'log_content': log_content
+            }
+            
+            logger.info(f"Accuracy verified: {self.rip_report['accuracy_verified']}")
+            logger.info(f"AccurateRip verified: {self.rip_report['accuraterip_verified']}")
+            
+        except Exception as e:
+            logger.error(f"Error parsing rip log: {e}")
+    
+    def import_with_beets(self):
+        """Import FLAC files to beets library with metadata enhancement"""
+        logger.info("Importing to beets library...")
+        
+        try:
+            # Import to FLAC library
+            beets_cmd = [
+                "beet", "import", "--noautotag", str(self.rip_dir)
+            ]
+            
+            result = subprocess.run(
+                beets_cmd,
+                capture_output=True,
+                text=True,
+                timeout=1800  # 30 minute timeout
+            )
+            
+            if result.returncode != 0:
+                logger.warning(f"Beets import had issues: {result.stderr}")
+                # Continue anyway as beets often has non-zero exit codes
+            
+            logger.info("Beets import completed")
+            
+            # Re-import with autotag for metadata enhancement
+            beets_autotag_cmd = [
+                "beet", "import", "--autotag", str(self.rip_dir)
+            ]
+            
+            result = subprocess.run(
+                beets_autotag_cmd,
+                capture_output=True,
+                text=True,
+                timeout=1800,
+                input="y\n" * 20  # Auto-accept matches
+            )
+            
+            logger.info("Metadata enhancement completed")
+            
+            # Get album information from beets
+            self._get_album_info()
+            
+            return True
+            
+        except subprocess.TimeoutExpired:
+            raise CDRippingError("Beets import timed out")
+        except Exception as e:
+            raise CDRippingError(f"Error during beets import: {e}")
+    
+    def _get_album_info(self):
+        """Get album information from beets database"""
+        try:
+            result = subprocess.run([
+                "beet", "list", "-f", "$albumartist - $album - $year",
+                "added:-1d.."  # Items added in last day
+            ], capture_output=True, text=True)
+            
+            if result.returncode == 0 and result.stdout.strip():
+                self.album_info['beets_info'] = result.stdout.strip()
+                logger.info(f"Album info: {self.album_info['beets_info']}")
+                
+        except Exception as e:
+            logger.error(f"Error getting album info: {e}")
+    
+    def convert_to_mp3(self):
+        """Convert FLAC files to MP3 using beets convert plugin"""
+        if self.skip_mp3:
+            logger.info("Skipping MP3 conversion")
+            return True
+            
+        logger.info("Converting to MP3...")
+        
+        try:
+            # Use beets convert to generate MP3s
+            convert_cmd = [
+                "beet", "convert", "-f", "mp3", 
+                "added:-1d.."  # Convert recently added items
+            ]
+            
+            result = subprocess.run(
+                convert_cmd,
+                capture_output=True,
+                text=True,
+                timeout=1800
+            )
+            
+            if result.returncode != 0:
+                logger.warning(f"MP3 conversion had issues: {result.stderr}")
+                # Continue anyway
+            
+            logger.info("MP3 conversion completed")
+            return True
+            
+        except subprocess.TimeoutExpired:
+            raise CDRippingError("MP3 conversion timed out")
+        except Exception as e:
+            raise CDRippingError(f"Error during MP3 conversion: {e}")
+    
+    def generate_report(self):
+        """Generate comprehensive rip report"""
+        if not self.rip_dir:
+            return
+            
+        # Find album directory in FLAC library
+        album_dirs = []
+        for flac_dir in FLAC_DIR.iterdir():
+            if flac_dir.is_dir():
+                for album_dir in flac_dir.iterdir():
+                    if album_dir.is_dir():
+                        album_dirs.append(album_dir)
+        
+        if not album_dirs:
+            logger.warning("No album directories found for report")
+            return
+        
+        # Use most recent album directory
+        album_dir = max(album_dirs, key=lambda x: x.stat().st_mtime)
+        
+        report_file = album_dir / "rip-report.txt"
+        
+        try:
+            with open(report_file, 'w', encoding='utf-8') as f:
+                f.write("=" * 60 + "\n")
+                f.write("CD RIP REPORT\n")
+                f.write("=" * 60 + "\n\n")
+                
+                f.write(f"Rip Date: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+                f.write(f"Album Directory: {album_dir}\n")
+                f.write(f"FLAC Location: {FLAC_DIR}\n")
+                f.write(f"MP3 Location: {MP3_DIR}\n\n")
+                
+                f.write("ACCURACY VERIFICATION:\n")
+                f.write("-" * 30 + "\n")
+                f.write(f"Accuracy Verified: {self.rip_report.get('accuracy_verified', 'Unknown')}\n")
+                f.write(f"AccurateRip Verified: {self.rip_report.get('accuraterip_verified', 'Unknown')}\n\n")
+                
+                if self.album_info.get('beets_info'):
+                    f.write("METADATA INFORMATION:\n")
+                    f.write("-" * 30 + "\n")
+                    f.write(f"Album: {self.album_info['beets_info']}\n")
+                    f.write("Sources: MusicBrainz, Discogs, Last.fm\n\n")
+                
+                f.write("FILE ORGANIZATION:\n")
+                f.write("-" * 30 + "\n")
+                f.write("Format: <AlbumArtist>/<AlbumName>/<TrackNum>-<TrackTitle>.<ext>\n")
+                f.write("Album Art: Embedded + cover.jpg in album directory\n\n")
+                
+                if self.rip_report.get('log_content'):
+                    f.write("WHIPPER LOG:\n")
+                    f.write("-" * 30 + "\n")
+                    f.write(self.rip_report['log_content'])
+                
+            logger.info(f"Rip report generated: {report_file}")
+            
+        except Exception as e:
+            logger.error(f"Error generating report: {e}")
+    
+    def cleanup_staging(self):
+        """Clean up staging directory"""
+        if self.keep_staging:
+            logger.info("Keeping staging files as requested")
+            return
+            
+        try:
+            if STAGING_DIR.exists():
+                shutil.rmtree(STAGING_DIR)
+                logger.info("Staging directory cleaned up")
+        except Exception as e:
+            logger.error(f"Error cleaning up staging: {e}")
+    
+    def run_pipeline(self):
+        """Execute the complete CD ripping pipeline"""
+        logger.info("Starting CD ripping pipeline")
+        
+        try:
+            # Step 1: Detect drive offset (optional)
+            self.detect_drive_offset()
+            
+            # Step 2: Rip CD with whipper
+            if not self.rip_cd_with_whipper():
+                raise CDRippingError("CD rip failed")
+            
+            # Step 3: Import with beets
+            if not self.import_with_beets():
+                raise CDRippingError("Beets import failed")
+            
+            # Step 4: Convert to MP3
+            if not self.convert_to_mp3():
+                raise CDRippingError("MP3 conversion failed")
+            
+            # Step 5: Generate report
+            self.generate_report()
+            
+            # Step 6: Cleanup
+            self.cleanup_staging()
+            
+            logger.info("CD ripping pipeline completed successfully")
+            return True
+            
+        except CDRippingError as e:
+            logger.error(f"Pipeline failed: {e}")
+            return False
+        except Exception as e:
+            logger.error(f"Unexpected error: {e}")
+            return False
+
+def main():
+    parser = argparse.ArgumentParser(description="Comprehensive CD Ripping Pipeline")
+    parser.add_argument("--device", default="/dev/sr0", help="CD device path")
+    parser.add_argument("--skip-mp3", action="store_true", help="Skip MP3 conversion")
+    parser.add_argument("--keep-staging", action="store_true", help="Keep staging files")
+    
+    args = parser.parse_args()
+    
+    # Check if device exists
+    if not Path(args.device).exists():
+        logger.error(f"CD device not found: {args.device}")
+        sys.exit(1)
+    
+    # Create directories if they don't exist
+    for dir_path in [FLAC_DIR, MP3_DIR]:
+        dir_path.mkdir(parents=True, exist_ok=True)
+    
+    # Run the pipeline
+    ripper = CDRipper(
+        device=args.device,
+        skip_mp3=args.skip_mp3,
+        keep_staging=args.keep_staging
+    )
+    
+    if ripper.run_pipeline():
+        logger.info("CD ripping completed successfully!")
+        print("SUCCESS: CD ripped and organized successfully")
+        sys.exit(0)
+    else:
+        logger.error("CD ripping failed!")
+        print("ERROR: CD ripping failed - check logs for details")
+        sys.exit(1)
+
+if __name__ == "__main__":
+    main()

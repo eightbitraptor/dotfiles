@@ -1,0 +1,12 @@
+[Unit]
+Description=CD Ripping Staging Cleanup Timer
+Documentation=man:systemd.timer(5)
+
+[Timer]
+# Run daily at 3 AM
+OnCalendar=daily
+Persistent=true
+RandomizedDelaySec=3600
+
+[Install]
+WantedBy=timers.target

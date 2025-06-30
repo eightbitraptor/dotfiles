@@ -1,0 +1,75 @@
+#!/bin/bash
+# Cleanup Script for CD Ripping Staging Area
+# Removes old staging files and logs
+
+set -euo pipefail
+
+STAGING_DIR="<%= staging_dir %>"
+LOG_DIR="$HOME/.local/share"
+MAX_AGE_DAYS=7
+
+echo "=== CD Ripping Staging Cleanup ==="
+echo "Staging directory: $STAGING_DIR"
+echo "Max age: $MAX_AGE_DAYS days"
+echo
+
+# Create log directory if it doesn't exist
+mkdir -p "$LOG_DIR"
+
+# Count files before cleanup
+if [[ -d "$STAGING_DIR" ]]; then
+    BEFORE_COUNT=$(find "$STAGING_DIR" -type f 2>/dev/null | wc -l)
+    BEFORE_SIZE=$(du -sh "$STAGING_DIR" 2>/dev/null | cut -f1 || echo "0B")
+else
+    BEFORE_COUNT=0
+    BEFORE_SIZE="0B"
+fi
+
+echo "Files before cleanup: $BEFORE_COUNT"
+echo "Size before cleanup: $BEFORE_SIZE"
+echo
+
+# Remove old staging files
+if [[ -d "$STAGING_DIR" ]]; then
+    echo "Removing staging files older than $MAX_AGE_DAYS days..."
+    find "$STAGING_DIR" -type f -mtime +$MAX_AGE_DAYS -delete 2>/dev/null || true
+    
+    # Remove empty directories
+    find "$STAGING_DIR" -type d -empty -delete 2>/dev/null || true
+    
+    echo "Staging cleanup completed"
+else
+    echo "Staging directory does not exist"
+fi
+
+# Clean up old log files
+echo "Cleaning up old log files..."
+find "$LOG_DIR" -name "cd-ripping.log.*" -mtime +30 -delete 2>/dev/null || true
+
+# Rotate current log if it's too large (>10MB)
+LOG_FILE="$LOG_DIR/cd-ripping.log"
+if [[ -f "$LOG_FILE" ]]; then
+    LOG_SIZE=$(stat -f%z "$LOG_FILE" 2>/dev/null || stat -c%s "$LOG_FILE" 2>/dev/null || echo 0)
+    if [[ $LOG_SIZE -gt 10485760 ]]; then
+        echo "Rotating large log file..."
+        mv "$LOG_FILE" "$LOG_FILE.$(date +%Y%m%d_%H%M%S)"
+        touch "$LOG_FILE"
+    fi
+fi
+
+# Count files after cleanup
+if [[ -d "$STAGING_DIR" ]]; then
+    AFTER_COUNT=$(find "$STAGING_DIR" -type f 2>/dev/null | wc -l)
+    AFTER_SIZE=$(du -sh "$STAGING_DIR" 2>/dev/null | cut -f1 || echo "0B")
+else
+    AFTER_COUNT=0
+    AFTER_SIZE="0B"
+fi
+
+echo
+echo "Files after cleanup: $AFTER_COUNT"
+echo "Size after cleanup: $AFTER_SIZE"
+echo "Cleanup completed successfully!"
+
+# Log cleanup activity
+echo "$(date): Cleanup completed - Before: $BEFORE_COUNT files ($BEFORE_SIZE), After: $AFTER_COUNT files ($AFTER_SIZE)" >> "$LOG_DIR/cleanup.log"
